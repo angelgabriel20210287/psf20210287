@@ -1,30 +1,32 @@
 import { useState } from "react";
+import { useProductos, type Product } from "../Context/ProductContext";
 import "./Productos.css";
 
 const Productos = () => {
+  const { agregarProducto } = useProductos();
+
   const [codigo, setCodigo] = useState("");
   const [nombre, setNombre] = useState("");
-  const [categoria, setCategoria] = useState("");
+  const [stock, setStock] = useState("");
   const [precio, setPrecio] = useState("");
   const [costo, setCosto] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const nuevoProducto = {
+    const nuevoProducto: Product = {
       codigo,
       nombre,
-      categoria,
-      precio,
-      costo,
+      stock: Number(stock),
+      precio: Number(precio),
+      costo: Number(costo),
     };
 
-    console.log("Producto agregado:", nuevoProducto);
+    agregarProducto(nuevoProducto);
 
-    // Limpiar formulario
     setCodigo("");
     setNombre("");
-    setCategoria("");
+    setStock("");
     setPrecio("");
     setCosto("");
   };
@@ -36,33 +38,22 @@ const Productos = () => {
       <form className="productos-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="codigo">Código</label>
-          <input
-            id="codigo"
-            type="text"
-            value={codigo}
-            onChange={(e) => setCodigo(e.target.value)}
-            required
-          />
+          <input id="codigo" value={codigo} onChange={(e) => setCodigo(e.target.value)} required />
         </div>
 
         <div className="form-group">
           <label htmlFor="nombre">Nombre del producto</label>
-          <input
-            id="nombre"
-            type="text"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            required
-          />
+          <input id="nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
         </div>
 
         <div className="form-group">
-          <label htmlFor="categoria">Categoría</label>
+          <label htmlFor="stock">Stock</label>
           <input
-            id="categoria"
-            type="text"
-            value={categoria}
-            onChange={(e) => setCategoria(e.target.value)}
+            id="stock"
+            type="number"
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
+            required
           />
         </div>
 
@@ -84,12 +75,11 @@ const Productos = () => {
             type="number"
             value={costo}
             onChange={(e) => setCosto(e.target.value)}
+            required
           />
         </div>
 
-        <button type="submit" className="btn-guardar">
-          Guardar Producto
-        </button>
+        <button type="submit">Guardar Producto</button>
       </form>
     </div>
   );

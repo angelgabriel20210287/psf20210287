@@ -1,0 +1,65 @@
+/* ===============================
+   ESTILO NORMAL (PANTALLA)
+   =============================== */
+
+.factura {
+  width: 280px;
+  font-family: monospace;
+  font-size: 12px;
+  padding: 10px;
+  background: white;
+}
+
+.factura h2 {
+  text-align: center;
+  margin: 0;
+}
+
+.factura p {
+  text-align: center;
+  margin: 2px 0;
+}
+
+.factura-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 5px;
+}
+
+.factura hr {
+  border: 1px dashed black;
+  margin: 5px 0;
+}
+
+.gracias {
+  text-align: center;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+/* ===============================
+   ESTILO IMPRESIÓN (REACT SAFE)
+   =============================== */
+
+@media print {
+  @page {
+    margin: 0;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .factura,
+  .factura * {
+    visibility: visible;
+  }
+
+  .factura {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 280px;
+    padding: 10px;
+  }
+}

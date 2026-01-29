@@ -54,6 +54,15 @@
   animation: gradientMove 3s ease infinite;
 }
 
+@keyframes gradientMove {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -89,7 +98,7 @@
   color: #9ca3af;
 }
 
-.btn-guardar {
+.productos-form button[type="submit"] {
   width: 100%;
   padding: 16px;
   background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
@@ -106,22 +115,13 @@
   letter-spacing: 1px;
 }
 
-.btn-guardar:hover {
+.productos-form button[type="submit"]:hover {
   background: linear-gradient(135deg, #e85a28 0%, #e08116 100%);
   box-shadow: 0 8px 28px rgba(255, 107, 53, 0.45);
   transform: translateY(-2px);
 }
 
-.btn-guardar:active {
+.productos-form button[type="submit"]:active {
   transform: translateY(0);
   box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
-}
-
-@keyframes gradientMove {
-  0%, 100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
 }
