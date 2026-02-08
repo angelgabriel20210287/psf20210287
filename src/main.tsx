@@ -1,10 +1,21 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import { BrowserRouter } from "react-router-dom";
+import { ClienteProvider } from "./Context/ClienteContext";
+import { FacturaProvider } from "./Context/FacturaContext";
+import { ProductProvider } from "./Context/ProductContext";
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <ClienteProvider>
+        <FacturaProvider>
+          <ProductProvider>
+            <App />
+          </ProductProvider>
+        </FacturaProvider>
+      </ClienteProvider>
+    </BrowserRouter>
+  </React.StrictMode>
+);

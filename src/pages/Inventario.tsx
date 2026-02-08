@@ -1,26 +1,54 @@
-import { useState } from "react";
-import { useProductos, type Product } from "../Context/ProductContext";
+import { useEffect, useState } from "react";
+import api from "../api/axios";
 import "./Inventario.css";
 
+interface Product {
+  idproducto: number;
+  codigo: string;
+  nombre: string;
+  stock: number;
+  precio: number;
+  costo: number;
+}
+
 const Inventario = () => {
-  const { productos, eliminarProducto, actualizarProducto } = useProductos();
+  const [productos, setProductos] = useState<Product[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [productoEditando, setProductoEditando] = useState<Product | null>(null);
 
+  // 🔹 Cargar productos desde la BD
+  const cargarProductos = async () => {
+    const response = await api.get("/productos");
+    setProductos(response.data);
+  };
+
+  useEffect(() => {
+    cargarProductos();
+  }, []);
+
+  // 🔹 Filtrar productos
   const productosFiltrados = productos.filter(
     (p) =>
       p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
       p.codigo.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  const obtenerEstado = (stock: number) =>
-    stock > 0 ? "Disponible" : "Agotado";
+  // 🔹 Guardar edición
+  const guardarEdicion = async () => {
+    if (!productoEditando) return;
 
-  const guardarEdicion = () => {
-    if (productoEditando) {
-      actualizarProducto(productoEditando);
-      setProductoEditando(null);
-    }
+    await api.put(`/productos/${productoEditando.idproducto}`, productoEditando);
+    setProductoEditando(null);
+    cargarProductos();
+  };
+
+  // 🔹 Eliminar producto
+  const eliminarProducto = async (id: number) => {
+    const confirmar = confirm("¿Eliminar este producto?");
+    if (!confirmar) return;
+
+    await api.delete(`/productos/${id}`);
+    cargarProductos();
   };
 
   return (
@@ -42,7 +70,6 @@ const Inventario = () => {
             <th>Stock</th>
             <th>Precio venta</th>
             <th>Costo</th>
-            <th>Estado</th>
             <th>Acción</th>
           </tr>
         </thead>
@@ -50,24 +77,23 @@ const Inventario = () => {
         <tbody>
           {productosFiltrados.length === 0 ? (
             <tr>
-              <td colSpan={7} style={{ textAlign: "center" }}>
+              <td colSpan={6} style={{ textAlign: "center" }}>
                 No hay productos
               </td>
             </tr>
           ) : (
             productosFiltrados.map((p) => (
-              <tr key={p.codigo}>
+              <tr key={p.idproducto}>
                 <td>{p.codigo}</td>
                 <td>{p.nombre}</td>
                 <td>{p.stock}</td>
                 <td>{p.precio}</td>
                 <td>{p.costo}</td>
-                <td>{obtenerEstado(p.stock)}</td>
                 <td>
                   <button onClick={() => setProductoEditando({ ...p })}>
                     Editar
                   </button>
-                  <button onClick={() => eliminarProducto(p.codigo)}>
+                  <button onClick={() => eliminarProducto(p.idproducto)}>
                     Eliminar
                   </button>
                 </td>
@@ -85,7 +111,10 @@ const Inventario = () => {
           <input
             value={productoEditando.nombre}
             onChange={(e) =>
-              setProductoEditando({ ...productoEditando, nombre: e.target.value })
+              setProductoEditando({
+                ...productoEditando,
+                nombre: e.target.value,
+              })
             }
           />
 

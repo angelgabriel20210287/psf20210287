@@ -1,50 +1,40 @@
+import type { Factura as FacturaType } from "../Context/FacturaContext";
 import "./Factura.css";
 
-interface FacturaItem {
-  nombre: string;
-  precio: number;
-  cantidad: number;
-  subtotal: number;
+interface Props {
+  factura: FacturaType;
 }
 
-interface FacturaProps {
-  items: FacturaItem[];
-  total: number;
-  pagoCon: number;
-  cambio: number;
-}
-
-const Factura = ({ items, total, pagoCon, cambio }: FacturaProps) => {
-  const fecha = new Date().toLocaleString();
-
+const FacturaPrint = ({ factura }: Props) => {
   return (
     <div className="factura">
       <h2>Repuestos Ringo</h2>
       <p>Factura de Venta</p>
-      <p>{fecha}</p>
+      <p>{factura.fecha}</p>
+
+      <p><strong>Cliente:</strong> {factura.cliente.nombre}</p>
+      <p><strong>Teléfono:</strong> {factura.cliente.telefono}</p>
+      <p><strong>Dirección:</strong> {factura.cliente.direccion}</p>
 
       <hr />
 
-      {items.map((item, index) => (
+      {factura.detalles.map((item, index) => (
         <div key={index} className="factura-item">
           <span>{item.nombre}</span>
-          <span>
-            {item.cantidad} x ${item.precio}
-          </span>
-          <span>${item.subtotal}</span>
+          <span>{item.cantidad} x RD$ {item.precio}</span>
+          <span>RD$ {item.subtotal}</span>
         </div>
       ))}
 
       <hr />
 
-      <p>Total: ${total}</p>
-      <p>Pagó con: ${pagoCon}</p>
-      <p>Cambio: ${cambio}</p>
+      <p>Total: RD$ {factura.total}</p>
+      <p>Pagó con: RD$ {factura.pago}</p>
+      <p>Cambio: RD$ {factura.cambio}</p>
 
-      <hr />
       <p className="gracias">¡Gracias por su compra!</p>
     </div>
   );
 };
 
-export default Factura;
+export default FacturaPrint;

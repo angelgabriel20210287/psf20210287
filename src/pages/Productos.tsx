@@ -1,9 +1,19 @@
-import { useState } from "react";
-import { useProductos, type Product } from "../Context/ProductContext";
+import { useEffect, useState } from "react";
+import api from "../api/axios";
 import "./Productos.css";
 
+interface Product {
+  idproducto?: number;
+  codigo: string;
+  nombre: string;
+  stock: number;
+  precio: number;
+  costo: number;
+}
+
 const Productos = () => {
-  const { agregarProducto } = useProductos();
+  const [productos, setProductos] = useState<Product[]>([]);
+  const [productoEditando, setProductoEditando] = useState<Product | null>(null);
 
   const [codigo, setCodigo] = useState("");
   const [nombre, setNombre] = useState("");
@@ -11,10 +21,21 @@ const Productos = () => {
   const [precio, setPrecio] = useState("");
   const [costo, setCosto] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 🔹 Obtener productos desde PostgreSQL
+  const cargarProductos = async () => {
+    const response = await api.get("/productos");
+    setProductos(response.data);
+  };
+
+  useEffect(() => {
+    cargarProductos();
+  }, []);
+
+  // 🔹 Guardar / Actualizar producto
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const nuevoProducto: Product = {
+    const nuevoProducto = {
       codigo,
       nombre,
       stock: Number(stock),
@@ -22,8 +43,38 @@ const Productos = () => {
       costo: Number(costo),
     };
 
-    agregarProducto(nuevoProducto);
+    if (productoEditando) {
+      await api.put(`/productos/${productoEditando.idproducto}`, nuevoProducto);
+      setProductoEditando(null);
+    } else {
+      await api.post("/productos", nuevoProducto);
+    }
 
+    cargarProductos();
+    limpiarFormulario();
+  };
+
+  // 🔹 Editar producto
+  const handleEditar = (p: Product) => {
+    setProductoEditando(p);
+    setCodigo(p.codigo);
+    setNombre(p.nombre);
+    setStock(String(p.stock));
+    setPrecio(String(p.precio));
+    setCosto(String(p.costo));
+  };
+
+  // 🔹 Eliminar producto
+  const handleEliminar = async (id: number) => {
+    const confirmar = confirm("¿Seguro que deseas eliminar este producto?");
+    if (!confirmar) return;
+
+    await api.delete(`/productos/${id}`);
+    cargarProductos();
+  };
+
+  // 🔹 Limpiar formulario
+  const limpiarFormulario = () => {
     setCodigo("");
     setNombre("");
     setStock("");
@@ -33,54 +84,64 @@ const Productos = () => {
 
   return (
     <div className="productos-container">
-      <h2>Registro de Productos</h2>
+      <h2>{productoEditando ? "Editar Producto" : "Registro de Productos"}</h2>
 
       <form className="productos-form" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="codigo">Código</label>
-          <input id="codigo" value={codigo} onChange={(e) => setCodigo(e.target.value)} required />
-        </div>
+        <input
+          placeholder="Código"
+          value={codigo}
+          onChange={(e) => setCodigo(e.target.value)}
+          required
+        />
 
-        <div className="form-group">
-          <label htmlFor="nombre">Nombre del producto</label>
-          <input id="nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
-        </div>
+        <input
+          placeholder="Nombre"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          required
+        />
 
-        <div className="form-group">
-          <label htmlFor="stock">Stock</label>
-          <input
-            id="stock"
-            type="number"
-            value={stock}
-            onChange={(e) => setStock(e.target.value)}
-            required
-          />
-        </div>
+        <input
+          type="number"
+          placeholder="Stock"
+          value={stock}
+          onChange={(e) => setStock(e.target.value)}
+          required
+        />
 
-        <div className="form-group">
-          <label htmlFor="precio">Precio de venta</label>
-          <input
-            id="precio"
-            type="number"
-            value={precio}
-            onChange={(e) => setPrecio(e.target.value)}
-            required
-          />
-        </div>
+        <input
+          type="number"
+          placeholder="Precio"
+          value={precio}
+          onChange={(e) => setPrecio(e.target.value)}
+          required
+        />
 
-        <div className="form-group">
-          <label htmlFor="costo">Costo</label>
-          <input
-            id="costo"
-            type="number"
-            value={costo}
-            onChange={(e) => setCosto(e.target.value)}
-            required
-          />
-        </div>
+        <input
+          type="number"
+          placeholder="Costo"
+          value={costo}
+          onChange={(e) => setCosto(e.target.value)}
+          required
+        />
 
-        <button type="submit">Guardar Producto</button>
+        <button type="submit">
+          {productoEditando ? "Actualizar" : "Guardar Producto"}
+        </button>
       </form>
+
+      <hr />
+
+      <h3>Listado de Productos</h3>
+      <ul>
+        {productos.map((p) => (
+          <li key={p.idproducto}>
+            {p.codigo} - {p.nombre} | Stock: {p.stock}
+            <button onClick={() => handleEditar(p)}>✏️</button>
+            <button onClick={() => handleEliminar(p.idproducto!)}>🗑</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

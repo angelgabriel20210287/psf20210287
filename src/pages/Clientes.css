@@ -1,4 +1,4 @@
-.productos-container {
+.clientes-container {
   width: 100%;
   min-height: 100vh;
   padding: 30px;
@@ -7,7 +7,7 @@
   margin: 0 auto;
 }
 
-.productos-container h2 {
+.clientes-container h2 {
   margin-bottom: 30px;
   color: #1a1a2e;
   font-size: 32px;
@@ -18,7 +18,7 @@
   text-align: center;
 }
 
-.productos-container h2::after {
+.clientes-container h2::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -31,7 +31,7 @@
 }
 
 /* FORMULARIO */
-.productos-form {
+.form-clientes {
   background: white;
   padding: 35px;
   border-radius: 16px;
@@ -45,7 +45,7 @@
   margin-bottom: 40px;
 }
 
-.productos-form::before {
+.form-clientes::before {
   content: '';
   position: absolute;
   top: 0;
@@ -66,7 +66,7 @@
   }
 }
 
-.productos-form input {
+.form-clientes input {
   padding: 14px 18px;
   border-radius: 10px;
   border: 2px solid #e5e7eb;
@@ -75,57 +75,58 @@
   background: white;
 }
 
-.productos-form input:focus {
+.form-clientes input:focus {
   outline: none;
   border-color: #ff6b35;
   box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
   background: #fffbf8;
 }
 
-.productos-form input::placeholder {
+.form-clientes input::placeholder {
   color: #9ca3af;
   font-weight: 500;
 }
 
-.productos-form button[type="submit"] {
-  grid-column: 1 / -1;
-  padding: 16px;
-  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-  color: white;
+.form-clientes button {
+  padding: 14px 20px;
   border: none;
   border-radius: 10px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.35);
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-top: 10px;
+  letter-spacing: 0.5px;
 }
 
-.productos-form button[type="submit"]:hover {
+.form-clientes button:first-of-type {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.35);
+  grid-column: span 2;
+}
+
+.form-clientes button:first-of-type:hover {
   background: linear-gradient(135deg, #e85a28 0%, #e08116 100%);
   box-shadow: 0 8px 28px rgba(255, 107, 53, 0.45);
   transform: translateY(-2px);
 }
 
-.productos-form button[type="submit"]:active {
-  transform: translateY(0);
-  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+.form-clientes button:last-of-type:not(:first-of-type) {
+  background: white;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+  grid-column: span 1;
 }
 
-/* SEPARADOR */
-.productos-container hr {
-  border: none;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #ff6b35, #f7931e, transparent);
-  margin: 40px 0;
-  border-radius: 2px;
+.form-clientes button:last-of-type:not(:first-of-type):hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #374151;
 }
 
-/* TÍTULO DE LISTADO */
-.productos-container h3 {
+/* TÍTULO DE TABLA */
+.clientes-container h3 {
   font-size: 24px;
   color: #1a1a2e;
   margin-bottom: 25px;
@@ -134,7 +135,7 @@
   display: inline-block;
 }
 
-.productos-container h3::after {
+.clientes-container h3::after {
   content: '';
   position: absolute;
   bottom: -8px;
@@ -145,92 +146,121 @@
   border-radius: 2px;
 }
 
-/* LISTA DE PRODUCTOS */
-.productos-container ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 15px;
+.clientes-container h3::before {
+  content: '👥 ';
+  margin-right: 10px;
 }
 
-.productos-container li {
+/* TABLA */
+.clientes-container table {
+  width: 100%;
+  border-collapse: collapse;
   background: white;
-  padding: 20px 25px;
   border-radius: 12px;
+  overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 2px solid #f3f4f6;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: all 0.3s ease;
-  font-size: 15px;
-  color: #1a1a2e;
-  font-weight: 500;
+  border: 1px solid #e5e7eb;
 }
 
-.productos-container li:hover {
-  border-color: #ff6b35;
-  box-shadow: 0 8px 30px rgba(255, 107, 53, 0.15);
-  transform: translateX(5px);
+.clientes-container th,
+.clientes-container td {
+  padding: 16px 20px;
+  text-align: left;
+  font-size: 14px;
 }
 
-.productos-container li::before {
-  content: '📦';
-  font-size: 24px;
-  margin-right: 15px;
+.clientes-container th {
+  background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 13px;
 }
 
-.productos-container li button {
-  padding: 10px 16px;
+.clientes-container td {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.clientes-container tbody tr {
+  transition: all 0.2s ease;
+}
+
+.clientes-container tbody tr:hover {
+  background: linear-gradient(90deg, rgba(255, 107, 53, 0.05) 0%, rgba(247, 147, 30, 0.05) 100%);
+  transform: scale(1.01);
+}
+
+.clientes-container tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* BOTONES DE TABLA */
+.clientes-container td button {
+  padding: 8px 16px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 18px;
+  font-weight: 600;
+  font-size: 13px;
   transition: all 0.3s ease;
-  margin-left: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-right: 8px;
 }
 
-.productos-container li button:first-of-type {
+.clientes-container td button:first-of-type {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
-.productos-container li button:first-of-type:hover {
+.clientes-container td button:first-of-type:hover {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
   transform: translateY(-2px);
 }
 
-.productos-container li button:last-of-type {
+.clientes-container td button:last-of-type {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
-.productos-container li button:last-of-type:hover {
+.clientes-container td button:last-of-type:hover {
   background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
   transform: translateY(-2px);
 }
 
-.productos-container li button:active {
+.clientes-container td button:active {
   transform: translateY(0);
 }
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
-  .productos-form {
+  .form-clientes {
     grid-template-columns: 1fr;
   }
 
-  .productos-container li {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+  .form-clientes button:first-of-type {
+    grid-column: span 1;
   }
 
-  .productos-container li button {
+  .clientes-container table {
+    font-size: 13px;
+  }
+
+  .clientes-container th,
+  .clientes-container td {
+    padding: 12px 15px;
+  }
+
+  .clientes-container td button {
+    padding: 6px 12px;
+    font-size: 12px;
+    display: block;
     width: 100%;
+    margin-bottom: 5px;
   }
 }

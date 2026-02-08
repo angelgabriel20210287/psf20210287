@@ -1,113 +1,385 @@
 .ventas-container {
-  max-width: 1000px;
-  margin: auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
+  padding: 30px;
+  background: transparent;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .ventas-container h2 {
-  text-align: center;
-  margin-bottom: 15px;
+  font-size: 32px;
+  margin-bottom: 30px;
+  color: #1a1a2e;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  position: relative;
+  padding-bottom: 15px;
 }
 
-.ventas-container input {
+.ventas-container h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #ff6b35, #f7931e);
+  border-radius: 2px;
+}
+
+/* SECCIÓN DE BÚSQUEDA Y CLIENTE */
+.ventas-container label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-top: 15px;
+}
+
+.ventas-container select,
+.ventas-container input[type="text"],
+.ventas-container input[placeholder*="Buscar"] {
   width: 100%;
-  padding: 8px;
-  margin-bottom: 15px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-.productos-lista {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  max-width: 500px;
+  padding: 14px 20px;
+  font-size: 15px;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
+  background: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   margin-bottom: 20px;
 }
 
+.ventas-container select:focus,
+.ventas-container input:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+}
+
+/* LISTA DE PRODUCTOS */
+.productos-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+  max-height: 350px;
+  overflow-y: auto;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.productos-lista::-webkit-scrollbar {
+  width: 8px;
+}
+
+.productos-lista::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 10px;
+}
+
+.productos-lista::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  border-radius: 10px;
+}
+
 .productos-lista button {
-  padding: 10px;
-  border: none;
-  border-radius: 6px;
-  background: #4caf50;
-  color: white;
+  padding: 16px 12px;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 147, 30, 0.1) 100%);
+  border: 2px solid #ff6b35;
+  border-radius: 10px;
+  color: #1a1a2e;
+  font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.productos-lista button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.3);
 }
 
 .productos-lista button:disabled {
-  background: #9e9e9e;
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: #d1d5db;
+  background: #f9fafb;
+  color: #9ca3af;
 }
 
-table {
+/* TABLA DE CARRITO */
+.ventas-container table {
   width: 100%;
   border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  margin-bottom: 25px;
 }
 
-thead {
-  background: #1976d2;
+.ventas-container th,
+.ventas-container td {
+  padding: 16px 20px;
+  text-align: left;
+  font-size: 14px;
+}
+
+.ventas-container th {
+  background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
   color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 13px;
 }
 
-th,
-td {
-  padding: 8px;
-  text-align: center;
-  border-bottom: 1px solid #ddd;
+.ventas-container td {
+  border-bottom: 1px solid #f3f4f6;
 }
 
-td input {
-  width: 60px;
+.ventas-container tbody tr {
+  transition: all 0.2s ease;
 }
 
-button {
+.ventas-container tbody tr:hover {
+  background: linear-gradient(90deg, rgba(255, 107, 53, 0.05) 0%, rgba(247, 147, 30, 0.05) 100%);
+}
+
+.ventas-container tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ventas-container td input[type="number"] {
+  width: 70px;
   padding: 8px 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.ventas-container td input[type="number"]:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.ventas-container td button {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
-  margin-right: 5px;
+  font-weight: 600;
+  font-size: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
-button:hover {
-  opacity: 0.9;
+.ventas-container td button:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  transform: translateY(-2px);
 }
 
+/* TOTAL */
 .ventas-container h3 {
+  font-size: 28px;
+  color: #1a1a2e;
+  font-weight: 800;
   text-align: right;
-  margin-top: 10px;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 2px solid #ff6b35;
 }
 
-/* MODAL COBRO */
+.ventas-container h3::before {
+  content: '💰 ';
+}
+
+/* BOTÓN COBRAR PRINCIPAL */
+.ventas-container > button {
+  width: 100%;
+  max-width: 300px;
+  padding: 18px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: block;
+  margin: 0 auto;
+}
+
+.ventas-container > button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.5);
+  transform: translateY(-3px);
+}
+
+.ventas-container > button:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* MODAL DE COBRO */
 .cobro-modal {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   background: white;
-  padding: 20px;
-  width: 300px;
-  border-radius: 10px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-  text-align: center;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   z-index: 1000;
+  min-width: 450px;
+  border: 3px solid #ff6b35;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.cobro-modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #ff6b35, #f7931e, #ff6b35);
+  background-size: 200% 100%;
+  border-radius: 20px 20px 0 0;
+  animation: gradientMove 3s ease infinite;
+}
+
+@keyframes gradientMove {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .cobro-modal input {
   width: 100%;
-  padding: 8px;
-  margin: 10px 0;
-}
-.acciones-cobro {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
+  padding: 16px 20px;
+  font-size: 18px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
-.acciones-cobro button {
-  flex: 1;
-  padding: 10px;
+.cobro-modal input:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+}
+
+.cobro-modal h4 {
+  font-size: 24px;
+  color: #1a1a2e;
+  margin-bottom: 25px;
+  text-align: center;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 147, 30, 0.1) 100%);
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px dashed #ff6b35;
+}
+
+.cobro-modal button {
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 12px;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.acciones-cobro .cancelar {
-  background: #ccc;
+.cobro-modal button:nth-of-type(1) {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.cobro-modal button:nth-of-type(1):hover:not(:disabled) {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  transform: translateY(-2px);
+}
+
+.cobro-modal button:nth-of-type(2) {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+.cobro-modal button:nth-of-type(2):hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.cobro-modal button:nth-of-type(3) {
+  background: white;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+}
+
+.cobro-modal button:nth-of-type(3):hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.cobro-modal button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
 }

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
@@ -6,25 +6,24 @@ import Productos from "./pages/Productos";
 import Ventas from "./pages/Ventas";
 import Inventario from "./pages/Inventario";
 import Reportes from "./pages/Reportes";
-import { ProductProvider } from "./Context/ProductContext";
+import Historial from "./pages/Historial";
+import Clientes from "./pages/Clientes";
 
 function App() {
   return (
-    <ProductProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
+    <Routes>
+      <Route path="/login" element={<Login />} />
 
-          <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/productos" element={<Productos />} />
-            <Route path="/ventas" element={<Ventas />} />
-            <Route path="/inventario" element={<Inventario />} />
-            <Route path="/reportes" element={<Reportes />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </ProductProvider>
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/productos" element={<Productos />} />
+        <Route path="/ventas" element={<Ventas />} />
+        <Route path="/inventario" element={<Inventario />} />
+        <Route path="/clientes" element={<Clientes />} />
+        <Route path="/historial" element={<Historial />} />
+        <Route path="/reportes" element={<Reportes />} />
+      </Route>
+    </Routes>
   );
 }
 

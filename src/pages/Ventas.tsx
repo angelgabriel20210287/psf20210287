@@ -1,10 +1,25 @@
-import { useState } from "react";
-import { useProductos, type Product } from "../Context/ProductContext";
+import { useEffect, useState } from "react";
+import api from "../api/axios";
 import Factura from "./Factura";
 import "./Ventas.css";
 
-interface VentaItem {
+interface Producto {
+  idproducto: number;
   codigo: string;
+  nombre: string;
+  precio: number;
+  stock: number;
+}
+
+interface Cliente {
+  idcliente: number;
+  nombre: string;
+  telefono: string;
+  direccion: string;
+}
+
+interface VentaItem {
+  idproducto: number;
   nombre: string;
   precio: number;
   cantidad: number;
@@ -12,13 +27,39 @@ interface VentaItem {
 }
 
 const Ventas = () => {
-  const { productos, actualizarProducto } = useProductos();
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [clienteId, setClienteId] = useState<number | null>(null);
 
   const [busqueda, setBusqueda] = useState("");
   const [carrito, setCarrito] = useState<VentaItem[]>([]);
+
   const [mostrarCobro, setMostrarCobro] = useState(false);
   const [mostrarFactura, setMostrarFactura] = useState(false);
   const [pagoCon, setPagoCon] = useState(0);
+  const [facturaActual, setFacturaActual] = useState<any>(null);
+
+  // 🔹 Cargar datos
+  const cargarDatos = async () => {
+    const prodRes = await api.get("/productos");
+    const cliRes = await api.get("/clientes");
+
+    const productosParseados = prodRes.data.map((p: any) => ({
+      ...p,
+      precio: Number(p.precio),
+      stock: Number(p.stock),
+    }));
+
+    setProductos(productosParseados);
+    setClientes(cliRes.data);
+  };
+
+  useEffect(() => {
+    cargarDatos();
+  }, []);
+
+  const clienteSeleccionado =
+    clientes.find((c) => c.idcliente === clienteId) ?? null;
 
   const productosFiltrados = productos.filter(
     (p) =>
@@ -26,15 +67,16 @@ const Ventas = () => {
       p.codigo.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  const agregarProducto = (producto: Product) => {
-    const existe = carrito.find((i) => i.codigo === producto.codigo);
+  // 🛒 AGREGAR PRODUCTO
+  const agregarProducto = (producto: Producto) => {
+    const existe = carrito.find((i) => i.idproducto === producto.idproducto);
 
     if (existe) {
       if (existe.cantidad >= producto.stock) return;
 
       setCarrito((prev) =>
         prev.map((i) =>
-          i.codigo === producto.codigo
+          i.idproducto === producto.idproducto
             ? {
                 ...i,
                 cantidad: i.cantidad + 1,
@@ -47,7 +89,7 @@ const Ventas = () => {
       setCarrito((prev) => [
         ...prev,
         {
-          codigo: producto.codigo,
+          idproducto: producto.idproducto,
           nombre: producto.nombre,
           precio: producto.precio,
           cantidad: 1,
@@ -57,91 +99,110 @@ const Ventas = () => {
     }
   };
 
-  const cambiarCantidad = (codigo: string, cantidad: number) => {
-    const producto = productos.find((p) => p.codigo === codigo);
+  const cambiarCantidad = (idproducto: number, cantidad: number) => {
+    const producto = productos.find((p) => p.idproducto === idproducto);
     if (!producto || cantidad < 1 || cantidad > producto.stock) return;
 
     setCarrito((prev) =>
       prev.map((i) =>
-        i.codigo === codigo
+        i.idproducto === idproducto
           ? { ...i, cantidad, subtotal: cantidad * i.precio }
           : i
       )
     );
   };
 
-  const eliminarItem = (codigo: string) => {
-    setCarrito((prev) => prev.filter((i) => i.codigo !== codigo));
+  const eliminarItem = (idproducto: number) => {
+    setCarrito((prev) => prev.filter((i) => i.idproducto !== idproducto));
   };
 
   const total = carrito.reduce((sum, i) => sum + i.subtotal, 0);
   const cambio = pagoCon - total;
 
-  // 🔵 COBRAR E IMPRIMIR
-  const cobrarEImprimir = () => {
-    carrito.forEach((item) => {
-      const producto = productos.find((p) => p.codigo === item.codigo);
-      if (!producto) return;
+  // 💰 PROCESAR VENTA
+  const procesarCobro = async (imprimir: boolean) => {
+    try {
+      const venta = {
+        idcliente: clienteId,
+        total,
+        pago: pagoCon,
+        cambio,
+        detalles: carrito.map((i) => ({
+          idproducto: i.idproducto,
+          cantidad: i.cantidad,
+          precio: i.precio,
+        })),
+      };
 
-      actualizarProducto({
-        ...producto,
-        stock: producto.stock - item.cantidad,
+      await api.post("/ventas", venta);
+
+      setFacturaActual({
+        cliente:
+          clienteSeleccionado ??
+          { nombre: "Consumidor Final", telefono: "N/A", direccion: "N/A" },
+        fecha: new Date().toLocaleString(),
+        total,
+        pago: pagoCon,
+        cambio,
+        detalles: carrito,
       });
-    });
 
-    setMostrarCobro(false);
-    setMostrarFactura(true);
+      setMostrarCobro(false);
 
-    setTimeout(() => {
-      window.print();
-      setMostrarFactura(false);
+      if (imprimir) {
+        setMostrarFactura(true);
+        setTimeout(() => {
+          window.print();
+          setMostrarFactura(false);
+        }, 500);
+      }
+
       setCarrito([]);
       setPagoCon(0);
-    }, 500);
-  };
-
-  // 🟢 COBRAR SIN IMPRIMIR
-  const cobrarSinImprimir = () => {
-    carrito.forEach((item) => {
-      const producto = productos.find((p) => p.codigo === item.codigo);
-      if (!producto) return;
-
-      actualizarProducto({
-        ...producto,
-        stock: producto.stock - item.cantidad,
-      });
-    });
-
-    setMostrarCobro(false);
-    setCarrito([]);
-    setPagoCon(0);
+      cargarDatos(); // 🔥 refresca stock
+    } catch (error) {
+      console.error(error);
+      alert("❌ Error al registrar la venta");
+    }
   };
 
   return (
     <div className="ventas-container">
       <h2>Ventas</h2>
 
+      <label>Cliente</label>
+      <select
+        value={clienteId ?? ""}
+        onChange={(e) =>
+          setClienteId(e.target.value ? Number(e.target.value) : null)
+        }
+      >
+        <option value="">Consumidor Final</option>
+        {clientes.map((c) => (
+          <option key={c.idcliente} value={c.idcliente}>
+            {c.nombre}
+          </option>
+        ))}
+      </select>
+
       <input
-        type="text"
         placeholder="Buscar producto..."
         value={busqueda}
         onChange={(e) => setBusqueda(e.target.value)}
       />
 
-      {/* PRODUCTOS */}
       <div className="productos-lista">
         {productosFiltrados.map((p) => (
           <button
-            key={p.codigo}
+            key={p.idproducto}
             disabled={p.stock === 0}
             onClick={() => agregarProducto(p)}
           >
-            {p.nombre} (${p.precio})
+            {p.nombre} (RD$ {p.precio})
           </button>
         ))}
       </div>
 
-      {/* CARRITO */}
       <table>
         <thead>
           <tr>
@@ -149,58 +210,42 @@ const Ventas = () => {
             <th>Cant.</th>
             <th>Precio</th>
             <th>Subtotal</th>
-            <th>Acción</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
-          {carrito.length === 0 ? (
-            <tr>
-              <td colSpan={5} style={{ textAlign: "center" }}>
-                Sin productos
+          {carrito.map((i) => (
+            <tr key={i.idproducto}>
+              <td>{i.nombre}</td>
+              <td>
+                <input
+                  type="number"
+                  value={i.cantidad}
+                  onChange={(e) =>
+                    cambiarCantidad(i.idproducto, Number(e.target.value))
+                  }
+                />
+              </td>
+              <td>RD$ {i.precio}</td>
+              <td>RD$ {i.subtotal}</td>
+              <td>
+                <button onClick={() => eliminarItem(i.idproducto)}>
+                  Eliminar
+                </button>
               </td>
             </tr>
-          ) : (
-            carrito.map((i) => (
-              <tr key={i.codigo}>
-                <td>{i.nombre}</td>
-                <td>
-                  <input
-                    type="number"
-                    value={i.cantidad}
-                    onChange={(e) =>
-                      cambiarCantidad(i.codigo, Number(e.target.value))
-                    }
-                  />
-                </td>
-                <td>${i.precio}</td>
-                <td>${i.subtotal}</td>
-                <td>
-                  <button onClick={() => eliminarItem(i.codigo)}>
-                    Eliminar
-                  </button>
-                </td>
-              </tr>
-            ))
-          )}
+          ))}
         </tbody>
       </table>
 
-      <h3>Total: ${total}</h3>
+      <h3>Total: RD$ {total}</h3>
 
-      <button
-        disabled={carrito.length === 0}
-        onClick={() => setMostrarCobro(true)}
-      >
+      <button disabled={!carrito.length} onClick={() => setMostrarCobro(true)}>
         Cobrar
       </button>
 
-      <button onClick={() => setCarrito([])}>Cancelar venta</button>
-
-      {/* MODAL DE COBRO */}
       {mostrarCobro && (
         <div className="cobro-modal">
-          <h3>Total a pagar: ${total}</h3>
-
           <input
             type="number"
             placeholder="Pagó con..."
@@ -208,31 +253,21 @@ const Ventas = () => {
             onChange={(e) => setPagoCon(Number(e.target.value))}
           />
 
-          <h4>Cambio: ${cambio >= 0 ? cambio : 0}</h4>
+          <h4>Cambio: RD$ {cambio >= 0 ? cambio : 0}</h4>
 
-          <div className="acciones-cobro">
-            <button disabled={cambio < 0} onClick={cobrarEImprimir}>
-              Cobrar e imprimir
-            </button>
+          <button disabled={cambio < 0} onClick={() => procesarCobro(true)}>
+            Cobrar e imprimir
+          </button>
 
-            <button disabled={cambio < 0} onClick={cobrarSinImprimir}>
-              Cobrar sin imprimir
-            </button>
+          <button disabled={cambio < 0} onClick={() => procesarCobro(false)}>
+            Cobrar sin imprimir
+          </button>
 
-            <button onClick={() => setMostrarCobro(false)}>Cancelar</button>
-          </div>
+          <button onClick={() => setMostrarCobro(false)}>Cancelar</button>
         </div>
       )}
 
-      {/* FACTURA */}
-      {mostrarFactura && (
-        <Factura
-          items={carrito}
-          total={total}
-          pagoCon={pagoCon}
-          cambio={cambio}
-        />
-      )}
+      {mostrarFactura && facturaActual && <Factura factura={facturaActual} />}
     </div>
   );
 };

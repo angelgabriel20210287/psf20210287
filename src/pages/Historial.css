@@ -1,0 +1,56 @@
+/* =========================
+   HISTORIAL DE VENTAS
+========================= */
+
+.historial-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.historial-container h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.factura-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.factura-card h3 {
+  margin-bottom: 10px;
+}
+
+.factura-card p {
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.factura-card table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+}
+
+.factura-card th,
+.factura-card td {
+  border: 1px solid #e5e7eb;
+  padding: 8px;
+  text-align: left;
+  font-size: 14px;
+}
+
+.factura-card th {
+  background: #f3f4f6;
+  font-weight: 600;
+}
+
+.factura-card h4 {
+  margin-top: 12px;
+  text-align: right;
+  font-size: 18px;
+}
