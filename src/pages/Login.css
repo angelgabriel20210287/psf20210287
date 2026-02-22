@@ -8,7 +8,7 @@
   overflow: hidden;
 }
 
-/* Efecto de fondo animado */
+/* Efectos de fondo animados */
 .login-container::before {
   content: '';
   position: absolute;
@@ -159,30 +159,6 @@
 .login-box button:active {
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
-}
-
-.error {
-  color: #ef4444;
-  font-size: 14px;
-  font-weight: 600;
-  background: rgba(239, 68, 68, 0.1);
-  padding: 12px 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  border-left: 4px solid #ef4444;
-  animation: shake 0.5s ease;
-}
-
-@keyframes shake {
-  0%, 100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-10px);
-  }
-  75% {
-    transform: translateX(10px);
-  }
 }
 
 /* Pie de página del login */

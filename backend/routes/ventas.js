@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 
+// 🔹 REGISTRAR VENTA
 router.post("/", async (req, res) => {
   const { idcliente, total, pago, cambio, detalles } = req.body;
-
   const client = await pool.connect();
 
   try {
@@ -20,7 +20,7 @@ router.post("/", async (req, res) => {
 
     const idfactura = facturaRes.rows[0].idfactura;
 
-    // 2️⃣ Insertar detalle y descontar stock
+    // 2️⃣ Insertar detalles y descontar stock
     for (const item of detalles) {
       const subtotal = item.cantidad * item.precio;
 
@@ -40,14 +40,36 @@ router.post("/", async (req, res) => {
     }
 
     await client.query("COMMIT");
-
     res.json({ message: "Factura registrada correctamente" });
+
   } catch (error) {
     await client.query("ROLLBACK");
     console.error(error);
     res.status(500).json({ error: "Error al registrar factura" });
   } finally {
     client.release();
+  }
+});
+
+// 🔹 ELIMINAR FACTURA
+router.delete("/:idfactura", async (req, res) => {
+  const { idfactura } = req.params;
+
+  try {
+    await pool.query(
+      "DELETE FROM detalle_facturas WHERE idfactura = $1",
+      [idfactura]
+    );
+
+    await pool.query(
+      "DELETE FROM facturas WHERE idfactura = $1",
+      [idfactura]
+    );
+
+    res.json({ message: "Factura eliminada correctamente" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al eliminar factura" });
   }
 });
 

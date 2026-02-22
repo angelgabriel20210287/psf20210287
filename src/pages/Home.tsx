@@ -1,5 +1,5 @@
 import "./Home.css";
-import logo from "../assets/react.svg"; // ajusta la ruta
+import logo from "../assets/Logo.png"; // ajusta la ruta
 
 const Home = () => {
   return (

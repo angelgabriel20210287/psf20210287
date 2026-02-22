@@ -1,63 +1,90 @@
-import { useFacturas } from "../Context/FacturaContext";
+import { useEffect, useState } from "react";
+import api from "../api/axios";
+import FacturaPrint from "./Factura";
 import "./Historial.css";
 
+interface FacturaLista {
+  idfactura: number;
+  numerofactura: string;
+  fecha: string;
+  total: number;
+  cliente: string;
+}
+
 const Historial = () => {
-  const { facturas, eliminarFactura } = useFacturas();
+  const [facturas, setFacturas] = useState<FacturaLista[]>([]);
+  const [facturaPrint, setFacturaPrint] = useState<any>(null);
+
+  useEffect(() => {
+    cargarHistorial();
+  }, []);
+
+  const cargarHistorial = async () => {
+    const res = await api.get("/historial");
+    setFacturas(res.data);
+  };
+
+  const eliminarFactura = async (id: number) => {
+    const ok = window.confirm("¿Seguro que deseas eliminar esta factura?");
+    if (!ok) return;
+
+    await api.delete(`/historial/${id}`);
+    setFacturas(prev => prev.filter(f => f.idfactura !== id));
+  };
+
+  const reimprimir = async (id: number) => {
+    const res = await api.get(`/historial/${id}`);
+    setFacturaPrint(res.data);
+
+    setTimeout(() => {
+      window.print();
+      setFacturaPrint(null);
+    }, 300);
+  };
 
   return (
-    <div className="historial-container">
+    <div className="historial">
       <h2>Historial de Ventas</h2>
 
-      {facturas.length === 0 ? (
-        <p>No hay ventas registradas</p>
-      ) : (
-        facturas.map((f) => (
-          <div key={f.id} className="factura-card">
-            <h3>Factura {f.numero}</h3>
+      <table>
+        <thead>
+          <tr>
+            <th># Factura</th>
+            <th>Cliente</th>
+            <th>Fecha</th>
+            <th>Total</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {facturas.map(f => (
+            <tr key={f.idfactura}>
+              <td>{f.numerofactura}</td>
+              <td>{f.cliente}</td>
+              <td>{new Date(f.fecha).toLocaleDateString()}</td>
+              <td>${f.total}</td>
+              <td>
+                <button
+                  className="btn-reimprimir"
+                  onClick={() => reimprimir(f.idfactura)}
+                >
+                  Reimprimir
+                </button>
 
-            <p><strong>Fecha:</strong> {f.fecha}</p>
+                <button
+                  className="btn-eliminar"
+                  onClick={() => eliminarFactura(f.idfactura)}
+                >
+                  Eliminar
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
-            <p><strong>Cliente:</strong> {f.cliente.nombre}</p>
-            <p><strong>Teléfono:</strong> {f.cliente.telefono}</p>
-            <p><strong>Dirección:</strong> {f.cliente.direccion}</p>
-
-            <table>
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Cant.</th>
-                  <th>Precio</th>
-                  <th>Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                {f.detalles.map((d, i) => (
-                  <tr key={i}>
-                    <td>{d.nombre}</td>
-                    <td>{d.cantidad}</td>
-                    <td>RD$ {d.precio}</td>
-                    <td>RD$ {d.subtotal}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            <h4>Total: RD$ {f.total}</h4>
-
-            {/* 🗑️ BOTÓN ELIMINAR */}
-            <button
-              className="btn-eliminar"
-              onClick={() => {
-                if (confirm("¿Eliminar esta factura del historial?")) {
-                  eliminarFactura(f.id);
-                }
-              }}
-            >
-              Eliminar factura
-            </button>
-          </div>
-        ))
-      )}
+      {/* 👉 SOLO se renderiza para impresión */}
+      {facturaPrint && <FacturaPrint factura={facturaPrint} />}
     </div>
   );
 };

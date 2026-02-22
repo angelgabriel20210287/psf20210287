@@ -1,56 +1,111 @@
-/* =========================
-   HISTORIAL DE VENTAS
-========================= */
+/* ===============================
+   CONTENEDOR HISTORIAL
+================================ */
 
-.historial-container {
-  padding: 24px;
-  max-width: 1200px;
-  margin: auto;
-}
-
-.historial-container h2 {
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-.factura-card {
-  background: #ffffff;
-  border-radius: 12px;
+.historial {
   padding: 20px;
-  margin-bottom: 25px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.factura-card h3 {
-  margin-bottom: 10px;
+.historial h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2c3e50;
 }
 
-.factura-card p {
-  font-size: 14px;
-  margin: 4px 0;
-}
+/* ===============================
+   TABLA SOLO HISTORIAL
+================================ */
 
-.factura-card table {
+.historial table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.factura-card th,
-.factura-card td {
-  border: 1px solid #e5e7eb;
-  padding: 8px;
-  text-align: left;
+.historial thead {
+  background-color: #34495e;
+  color: white;
+}
+
+.historial th,
+.historial td {
+  padding: 12px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.historial tbody tr:hover {
+  background-color: #f2f2f2;
+}
+
+/* ===============================
+   BOTONES SOLO HISTORIAL
+================================ */
+
+.historial button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
   font-size: 14px;
 }
 
-.factura-card th {
-  background: #f3f4f6;
-  font-weight: 600;
+.historial .btn-reimprimir {
+  background-color: #3498db;
+  color: white;
 }
 
-.factura-card h4 {
-  margin-top: 12px;
-  text-align: right;
-  font-size: 18px;
+.historial .btn-reimprimir:hover {
+  background-color: #2980b9;
+}
+
+.historial .btn-eliminar {
+  background-color: #e74c3c;
+  color: white;
+  margin-left: 8px;
+}
+
+.historial .btn-eliminar:hover {
+  background-color: #c0392b;
+}
+
+/* ===============================
+   FACTURA (OCULTA EN PANTALLA)
+================================ */
+
+.factura {
+  display: none;
+}
+
+/* ===============================
+   SOLO IMPRESIÓN
+================================ */
+
+@media print {
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .factura,
+  .factura * {
+    visibility: visible;
+  }
+
+  .factura {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 300px;
+    margin: 0 auto;
+    font-family: monospace;
+    font-size: 12px;
+  }
 }

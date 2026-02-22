@@ -9,21 +9,36 @@ interface Product {
   stock: number;
   precio: number;
   costo: number;
+  idproveedor?: number | null;
+  proveedor?: string;
+}
+
+interface Proveedor {
+  idproveedor: number;
+  nombre: string;
 }
 
 const Inventario = () => {
   const [productos, setProductos] = useState<Product[]>([]);
+  const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [busqueda, setBusqueda] = useState("");
   const [productoEditando, setProductoEditando] = useState<Product | null>(null);
 
-  // 🔹 Cargar productos desde la BD
+  // 🔹 Cargar productos
   const cargarProductos = async () => {
     const response = await api.get("/productos");
     setProductos(response.data);
   };
 
+  // 🔹 Cargar proveedores
+  const cargarProveedores = async () => {
+    const response = await api.get("/proveedores");
+    setProveedores(response.data);
+  };
+
   useEffect(() => {
     cargarProductos();
+    cargarProveedores();
   }, []);
 
   // 🔹 Filtrar productos
@@ -37,14 +52,18 @@ const Inventario = () => {
   const guardarEdicion = async () => {
     if (!productoEditando) return;
 
-    await api.put(`/productos/${productoEditando.idproducto}`, productoEditando);
+    await api.put(
+      `/productos/${productoEditando.idproducto}`,
+      productoEditando
+    );
+
     setProductoEditando(null);
     cargarProductos();
   };
 
   // 🔹 Eliminar producto
   const eliminarProducto = async (id: number) => {
-    const confirmar = confirm("¿Eliminar este producto?");
+    const confirmar = window.confirm("¿Eliminar este producto?");
     if (!confirmar) return;
 
     await api.delete(`/productos/${id}`);
@@ -67,6 +86,7 @@ const Inventario = () => {
           <tr>
             <th>Código</th>
             <th>Producto</th>
+            <th>Proveedor</th>
             <th>Stock</th>
             <th>Precio venta</th>
             <th>Costo</th>
@@ -77,7 +97,7 @@ const Inventario = () => {
         <tbody>
           {productosFiltrados.length === 0 ? (
             <tr>
-              <td colSpan={6} style={{ textAlign: "center" }}>
+              <td colSpan={7} style={{ textAlign: "center" }}>
                 No hay productos
               </td>
             </tr>
@@ -86,6 +106,7 @@ const Inventario = () => {
               <tr key={p.idproducto}>
                 <td>{p.codigo}</td>
                 <td>{p.nombre}</td>
+                <td>{p.proveedor || "Sin proveedor"}</td>
                 <td>{p.stock}</td>
                 <td>{p.precio}</td>
                 <td>{p.costo}</td>
@@ -151,8 +172,30 @@ const Inventario = () => {
             }
           />
 
+          {/* Selector proveedor */}
+          <select
+            value={productoEditando.idproveedor || ""}
+            onChange={(e) =>
+              setProductoEditando({
+                ...productoEditando,
+                idproveedor: e.target.value
+                  ? Number(e.target.value)
+                  : null,
+              })
+            }
+          >
+            <option value="">Sin proveedor</option>
+            {proveedores.map((prov) => (
+              <option key={prov.idproveedor} value={prov.idproveedor}>
+                {prov.nombre}
+              </option>
+            ))}
+          </select>
+
           <button onClick={guardarEdicion}>Guardar</button>
-          <button onClick={() => setProductoEditando(null)}>Cancelar</button>
+          <button onClick={() => setProductoEditando(null)}>
+            Cancelar
+          </button>
         </div>
       )}
     </div>

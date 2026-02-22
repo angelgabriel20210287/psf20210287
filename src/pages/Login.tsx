@@ -1,49 +1,59 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
 import "./Login.css";
 
-const Login = () => {
+
+interface Props {
+  setAutenticado: (valor: boolean) => void;
+}
+
+const Login = ({ setAutenticado }: Props) => {
   const [usuario, setUsuario] = useState("");
-  const [clave, setClave] = useState("");
-  const [error, setError] = useState("");
+  const [contraseña, setContraseña] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+  const iniciarSesion = async () => {
+    try {
+      const res = await api.post("/login", {
+        usuario,
+        contraseña,
+      });
 
-    if (usuario === "Angel" && clave === "1234") {
-      localStorage.setItem("auth", "true");
-      navigate("/");
-    } else {
-      setError("Usuario o contraseña incorrectos");
+      if (res.data.success) {
+        localStorage.setItem("auth", "true");
+        setAutenticado(true);
+        navigate("/");
+      }
+    } catch (error) {
+      alert("Usuario o contraseña incorrectos");
     }
   };
 
-  return (
-    <div className="login-container">
-      <form className="login-box" onSubmit={handleLogin}>
-        <h2>Iniciar sesión</h2>
+ return (
+  <div className="login-container">
+    <div className="login-box">
+      <h2>Iniciar Sesión</h2>
 
-        {error && <p className="error">{error}</p>}
+      <input
+        type="text"
+        placeholder="Usuario"
+        value={usuario}
+        onChange={(e) => setUsuario(e.target.value)}
+      />
 
-        <input
-          type="text"
-          placeholder="Usuario"
-          value={usuario}
-          onChange={(e) => setUsuario(e.target.value)}
-        />
+      <input
+        type="password"
+        placeholder="Contraseña"
+        value={contraseña}
+        onChange={(e) => setContraseña(e.target.value)}
+      />
 
-        <input
-          type="password"
-          placeholder="Contraseña"
-          value={clave}
-          onChange={(e) => setClave(e.target.value)}
-        />
-
-        <button type="submit">Entrar</button>
-      </form>
+      <button onClick={iniciarSesion}>Entrar</button>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default Login;

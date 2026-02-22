@@ -3,10 +3,14 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import "./Layout.css";
 
-const Layout = () => {
+interface Props {
+  setAutenticado: (valor: boolean) => void;
+}
+
+const Layout = ({ setAutenticado }: Props) => {
   return (
     <div className="layout">
-      <Header />
+      <Header setAutenticado={setAutenticado} />
       <div className="body">
         <Sidebar />
         <main className="content">

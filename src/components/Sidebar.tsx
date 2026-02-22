@@ -6,9 +6,11 @@ const Sidebar = () => {
     <aside className="sidebar">
       <NavLink to="/">Inicio</NavLink>
       <NavLink to="/productos">Productos</NavLink>
+      <NavLink to="/proveedores">Proveedores</NavLink>
       <NavLink to="/ventas">Ventas</NavLink>
       <NavLink to="/inventario">Inventario</NavLink>
-      <NavLink to="/Historial">Historial</NavLink>
+      <NavLink to="/movimientos">Movimientos</NavLink>
+      <NavLink to="/Historial">Historial.</NavLink>
       <NavLink to="/Clientes">Clientes</NavLink>
       <NavLink to="/reportes">Reportes</NavLink>
     </aside>

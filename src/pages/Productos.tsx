@@ -9,10 +9,18 @@ interface Product {
   stock: number;
   precio: number;
   costo: number;
+  idproveedor?: number | null;
+  proveedor?: string; // viene del JOIN
+}
+
+interface Proveedor {
+  idproveedor: number;
+  nombre: string;
 }
 
 const Productos = () => {
   const [productos, setProductos] = useState<Product[]>([]);
+  const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [productoEditando, setProductoEditando] = useState<Product | null>(null);
 
   const [codigo, setCodigo] = useState("");
@@ -20,15 +28,23 @@ const Productos = () => {
   const [stock, setStock] = useState("");
   const [precio, setPrecio] = useState("");
   const [costo, setCosto] = useState("");
+  const [idproveedor, setIdproveedor] = useState("");
 
-  // 🔹 Obtener productos desde PostgreSQL
+  // 🔹 Cargar productos
   const cargarProductos = async () => {
     const response = await api.get("/productos");
     setProductos(response.data);
   };
 
+  // 🔹 Cargar proveedores
+  const cargarProveedores = async () => {
+    const response = await api.get("/proveedores");
+    setProveedores(response.data);
+  };
+
   useEffect(() => {
     cargarProductos();
+    cargarProveedores();
   }, []);
 
   // 🔹 Guardar / Actualizar producto
@@ -41,10 +57,14 @@ const Productos = () => {
       stock: Number(stock),
       precio: Number(precio),
       costo: Number(costo),
+      idproveedor: idproveedor ? Number(idproveedor) : null,
     };
 
     if (productoEditando) {
-      await api.put(`/productos/${productoEditando.idproducto}`, nuevoProducto);
+      await api.put(
+        `/productos/${productoEditando.idproducto}`,
+        nuevoProducto
+      );
       setProductoEditando(null);
     } else {
       await api.post("/productos", nuevoProducto);
@@ -62,11 +82,14 @@ const Productos = () => {
     setStock(String(p.stock));
     setPrecio(String(p.precio));
     setCosto(String(p.costo));
+    setIdproveedor(p.idproveedor ? String(p.idproveedor) : "");
   };
 
   // 🔹 Eliminar producto
   const handleEliminar = async (id: number) => {
-    const confirmar = confirm("¿Seguro que deseas eliminar este producto?");
+    const confirmar = window.confirm(
+      "¿Seguro que deseas eliminar este producto?"
+    );
     if (!confirmar) return;
 
     await api.delete(`/productos/${id}`);
@@ -80,11 +103,14 @@ const Productos = () => {
     setStock("");
     setPrecio("");
     setCosto("");
+    setIdproveedor("");
   };
 
   return (
     <div className="productos-container">
-      <h2>{productoEditando ? "Editar Producto" : "Registro de Productos"}</h2>
+      <h2>
+        {productoEditando ? "Editar Producto" : "Registro de Productos"}
+      </h2>
 
       <form className="productos-form" onSubmit={handleSubmit}>
         <input
@@ -125,6 +151,19 @@ const Productos = () => {
           required
         />
 
+        {/* 🔹 Selector de proveedor */}
+        <select
+          value={idproveedor}
+          onChange={(e) => setIdproveedor(e.target.value)}
+        >
+          <option value="">Sin proveedor</option>
+          {proveedores.map((prov) => (
+            <option key={prov.idproveedor} value={prov.idproveedor}>
+              {prov.nombre}
+            </option>
+          ))}
+        </select>
+
         <button type="submit">
           {productoEditando ? "Actualizar" : "Guardar Producto"}
         </button>
@@ -136,9 +175,13 @@ const Productos = () => {
       <ul>
         {productos.map((p) => (
           <li key={p.idproducto}>
-            {p.codigo} - {p.nombre} | Stock: {p.stock}
+            {p.codigo} - {p.nombre} | Stock: {p.stock} | 
+            Proveedor: {p.proveedor || "Sin proveedor"}
+
             <button onClick={() => handleEditar(p)}>✏️</button>
-            <button onClick={() => handleEliminar(p.idproducto!)}>🗑</button>
+            <button onClick={() => handleEliminar(p.idproducto!)}>
+              🗑
+            </button>
           </li>
         ))}
       </ul>

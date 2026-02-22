@@ -1,0 +1,304 @@
+.movimientos-container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 30px;
+  background: transparent;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Selector para el div sin clase */
+div:has(> form):has(> table) {
+  width: 100%;
+  min-height: 100vh;
+  padding: 30px;
+  background: transparent;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* TÍTULO PRINCIPAL */
+div:has(> form):has(> table) h2 {
+  font-size: 32px;
+  margin-bottom: 30px;
+  color: #1a1a2e;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  position: relative;
+  padding-bottom: 15px;
+}
+
+div:has(> form):has(> table) h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #ff6b35, #f7931e);
+  border-radius: 2px;
+}
+
+div:has(> form):has(> table) h2::before {
+  content: '📊 ';
+  margin-right: 10px;
+}
+
+/* FORMULARIO */
+div:has(> form):has(> table) form {
+  background: white;
+  padding: 35px;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e5e7eb;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+div:has(> form):has(> table) form::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #ff6b35, #f7931e, #ff6b35);
+  background-size: 200% 100%;
+  animation: gradientMove 3s ease infinite;
+}
+
+@keyframes gradientMove {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* INPUTS Y SELECTS */
+div:has(> form):has(> table) form select,
+div:has(> form):has(> table) form input {
+  padding: 14px 18px;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+div:has(> form):has(> table) form select:focus,
+div:has(> form):has(> table) form input:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+  background: #fffbf8;
+}
+
+div:has(> form):has(> table) form input::placeholder {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+/* SELECT TIPO - DESTACADO */
+div:has(> form):has(> table) form select:first-of-type {
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+div:has(> form):has(> table) form select:first-of-type option[value="ENTRADA"] {
+  color: #10b981;
+}
+
+div:has(> form):has(> table) form select:first-of-type option[value="SALIDA"] {
+  color: #ef4444;
+}
+
+/* BOTÓN SUBMIT */
+div:has(> form):has(> table) form button[type="submit"] {
+  grid-column: 1 / -1;
+  padding: 16px;
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 10px;
+}
+
+div:has(> form):has(> table) form button[type="submit"]:hover {
+  background: linear-gradient(135deg, #e85a28 0%, #e08116 100%);
+  box-shadow: 0 8px 28px rgba(255, 107, 53, 0.45);
+  transform: translateY(-2px);
+}
+
+div:has(> form):has(> table) form button[type="submit"]:active {
+  transform: translateY(0);
+}
+
+/* SEPARADOR */
+div:has(> form):has(> table) hr {
+  border: none;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #ff6b35, #f7931e, transparent);
+  margin: 40px 0;
+  border-radius: 2px;
+}
+
+/* TÍTULO HISTORIAL */
+div:has(> form):has(> table) h3 {
+  font-size: 24px;
+  color: #1a1a2e;
+  margin-bottom: 25px;
+  font-weight: 700;
+  position: relative;
+  display: inline-block;
+}
+
+div:has(> form):has(> table) h3::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #ff6b35, #f7931e);
+  border-radius: 2px;
+}
+
+div:has(> form):has(> table) h3::before {
+  content: '📋 ';
+  margin-right: 10px;
+}
+
+/* TABLA */
+div:has(> form):has(> table) table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+div:has(> form):has(> table) th,
+div:has(> form):has(> table) td {
+  padding: 16px 20px;
+  text-align: left;
+  font-size: 14px;
+}
+
+div:has(> form):has(> table) th {
+  background: linear-gradient(135deg, #16213e 0%, #1a1a2e 100%);
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 13px;
+}
+
+div:has(> form):has(> table) td {
+  border-bottom: 1px solid #f3f4f6;
+  color: #374151;
+  font-weight: 500;
+}
+
+div:has(> form):has(> table) tbody tr {
+  transition: all 0.2s ease;
+}
+
+div:has(> form):has(> table) tbody tr:hover {
+  background: linear-gradient(90deg, rgba(255, 107, 53, 0.05) 0%, rgba(247, 147, 30, 0.05) 100%);
+  transform: scale(1.005);
+}
+
+div:has(> form):has(> table) tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ESTILOS ESPECÍFICOS PARA COLUMNAS */
+/* Columna Tipo */
+div:has(> form):has(> table) td:nth-child(3) {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+div:has(> form):has(> table) tbody tr td:nth-child(3) {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 8px 16px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+div:has(> form):has(> table) tbody tr:has(td:nth-child(3):contains("SALIDA")) td:nth-child(3) {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Columna Cantidad */
+div:has(> form):has(> table) td:nth-child(4) {
+  font-weight: 700;
+  color: #ff6b35;
+  font-size: 15px;
+}
+
+/* Columna Fecha */
+div:has(> form):has(> table) td:nth-child(1) {
+  color: #6b7280;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+}
+
+/* BADGES PARA TIPO */
+.badge-entrada {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+.badge-salida {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  div:has(> form):has(> table) form {
+    grid-template-columns: 1fr;
+  }
+
+  div:has(> form):has(> table) table {
+    font-size: 13px;
+  }
+
+  div:has(> form):has(> table) th,
+  div:has(> form):has(> table) td {
+    padding: 12px 10px;
+  }
+}

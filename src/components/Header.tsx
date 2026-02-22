@@ -1,11 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import "./Header.css";
 
-const Header = () => {
+interface Props {
+  setAutenticado: (valor: boolean) => void;
+}
+
+const Header = ({ setAutenticado }: Props) => {
   const navigate = useNavigate();
 
   const logout = () => {
     localStorage.removeItem("auth");
+    setAutenticado(false);
     navigate("/login");
   };
 
