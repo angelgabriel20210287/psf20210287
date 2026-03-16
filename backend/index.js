@@ -16,6 +16,10 @@ const app = express();
 
 app.use(cors());
 
+app.get("/", (req, res) => {
+  res.send("API Sistema de Facturación funcionando 🚀");
+});
+
 // 🔥 IMPORTANTE PARA IMÁGENES BASE64
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
