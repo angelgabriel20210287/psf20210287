@@ -1,65 +1,107 @@
-/* ===============================
-   ESTILO NORMAL (PANTALLA)
-   =============================== */
-
+/* ===== ESTILOS PARA PANTALLA (Previsualización interna) ===== */
 .factura {
-  width: 280px;
-  font-family: monospace;
-  font-size: 12px;
-  padding: 10px;
-  background: white;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 20px auto;
+  padding: 15mm;
+  background: #fff;
+  color: #000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border: 1px solid #eee;
 }
 
-.factura h2 {
-  text-align: center;
-  margin: 0;
-}
-
-.factura p {
-  text-align: center;
-  margin: 2px 0;
-}
-
-.factura-item {
+.top-section {
   display: flex;
-  flex-direction: column;
-  margin-bottom: 5px;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
 
-.factura hr {
-  border: 1px dashed black;
-  margin: 5px 0;
+.logo-box img {
+  width: 140px;
+  height: auto;
 }
 
-.gracias {
-  text-align: center;
+.factura-info {
+  text-align: right;
+}
+
+.cliente-section {
+  margin-bottom: 20px;
+  border-top: 2px solid #333;
+  border-bottom: 2px solid #333;
+  padding: 10px 0;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.tabla th, .tabla td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.tabla th {
+  background-color: #f8f9fa;
+}
+
+.totales {
+  width: 250px;
+  margin-left: auto;
+}
+
+.totales div {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+}
+
+.total-final {
   font-weight: bold;
-  margin-top: 5px;
+  font-size: 1.2rem;
+  border-top: 2px solid #000;
 }
 
-/* ===============================
-   ESTILO IMPRESIÓN (REACT SAFE)
-   =============================== */
-
+/* ===== CONTROL DE IMPRESIÓN (MÁGICO) ===== */
 @media print {
-  @page {
-    margin: 0;
-  }
-
+  /* 1. Ocultamos el Layout completo de la App */
   body * {
     visibility: hidden;
   }
 
-  .factura,
+  /* 2. Mostramos SOLO el contenedor de la factura */
+  .print-only-wrapper, 
+  .print-only-wrapper *,
+  .factura, 
   .factura * {
-    visibility: visible;
+    visibility: visible !important;
   }
 
+  /* 3. Posicionamos la factura para que empiece en el origen de la hoja */
   .factura {
+    display: block !important;
     position: absolute;
-    top: 0;
     left: 0;
-    width: 280px;
-    padding: 10px;
+    top: 0;
+    width: 210mm;
+    margin: 0;
+    padding: 10mm;
+    border: none;
+  }
+
+  /* 4. Configuramos la página A4 */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
+
+/* Evita que se vea en la web normal mientras no se imprime */
+@media screen {
+  .print-only-wrapper {
+    display: none;
   }
 }

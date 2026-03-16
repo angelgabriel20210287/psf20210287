@@ -42,12 +42,14 @@
   }
 }
 
+/* Caja de login */
 .login-box {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   padding: 50px 40px;
   border-radius: 20px;
-  width: 420px;
+  width: 100%;
+  max-width: 440px;
   text-align: center;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -67,6 +69,7 @@
   }
 }
 
+/* Border superior animado */
 .login-box::before {
   content: '';
   position: absolute;
@@ -89,8 +92,27 @@
   }
 }
 
+/* Logo */
+.login-logo {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 8px 20px rgba(255, 107, 53, 0.4));
+  animation: logoPulse 2s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Título */
 .login-box h2 {
-  margin-bottom: 10px;
+  margin-bottom: 30px;
   color: #1a1a2e;
   font-size: 32px;
   font-weight: 800;
@@ -101,14 +123,41 @@
   background-clip: text;
 }
 
-.login-box h2::after {
-  content: '🔧';
-  display: block;
-  font-size: 48px;
-  margin: 15px 0 25px 0;
-  filter: drop-shadow(0 4px 8px rgba(255, 107, 53, 0.3));
+/* Select de rol */
+.login-box select {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  background: white;
+  box-sizing: border-box;
+  color: #1a1a2e;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ff6b35' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 45px;
 }
 
+.login-box select:focus {
+  outline: none;
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+  background-color: #fffbf8;
+}
+
+/* Estilos específicos para opciones */
+.login-box select option {
+  font-weight: 600;
+  padding: 10px;
+}
+
+/* Inputs */
 .login-box input {
   width: 100%;
   margin-bottom: 20px;
@@ -133,6 +182,7 @@
   background: #fffbf8;
 }
 
+/* Botón */
 .login-box button {
   width: 100%;
   padding: 16px;
@@ -148,6 +198,23 @@
   transition: all 0.3s ease;
   box-shadow: 0 8px 24px rgba(255, 107, 53, 0.4);
   margin-top: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-box button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.login-box button:hover::before {
+  left: 100%;
 }
 
 .login-box button:hover {
@@ -161,7 +228,7 @@
   box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
 }
 
-/* Pie de página del login */
+/* Pie de página */
 .login-box::after {
   content: 'Sistema de Facturación e Inventario';
   display: block;
@@ -171,4 +238,30 @@
   font-weight: 500;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+}
+
+/* Indicador de rol con badge */
+.login-box select:focus + .role-badge {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .login-container {
+    padding: 20px;
+  }
+
+  .login-box {
+    padding: 40px 30px;
+  }
+
+  .login-logo {
+    width: 100px;
+    height: 100px;
+  }
+
+  .login-box h2 {
+    font-size: 28px;
+  }
 }

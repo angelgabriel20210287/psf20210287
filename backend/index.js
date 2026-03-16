@@ -6,14 +6,19 @@ const pool = require("./db");
 const productosRoutes = require("./routes/productos");
 const ventasRoutes = require("./routes/ventas");
 const clientesRoutes = require("./routes/clientes");
-const historialRoutes = require("./routes/historial"); // ✅ NUEVO
+const historialRoutes = require("./routes/historial");
 const proveedoresRoutes = require("./routes/proveedores");
 const inventarioRoutes = require("./routes/inventario");
 const reportesRoutes = require("./routes/reportes");
+const cajaRoutes = require("./routes/caja");
 
 const app = express();
+
 app.use(cors());
-app.use(express.json());
+
+// 🔥 IMPORTANTE PARA IMÁGENES BASE64
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // 🔹 Ruta de prueba
 app.get("/test", async (req, res) => {
@@ -25,11 +30,13 @@ app.get("/test", async (req, res) => {
 app.use("/productos", productosRoutes);
 app.use("/ventas", ventasRoutes);
 app.use("/clientes", clientesRoutes);
-app.use("/historial", historialRoutes); // ✅ REGISTRADA
+app.use("/historial", historialRoutes);
 app.use("/proveedores", proveedoresRoutes);
 app.use("/login", require("./routes/login"));
 app.use("/inventario-movimientos", inventarioRoutes);
 app.use("/reportes", reportesRoutes);
+app.use("/empresa", require("./routes/empresa"));
+app.use("/api/caja", cajaRoutes);
 
 // 🔹 Servidor
 app.listen(3001, () => {

@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 
-// 🔹 LISTAR FACTURAS
+// 🔥 AGREGA ESTA RUTA PARA LISTAR TODAS LAS FACTURAS
 router.get("/", async (req, res) => {
   try {
     const result = await pool.query(`
@@ -16,22 +16,21 @@ router.get("/", async (req, res) => {
       LEFT JOIN cliente c ON f.idcliente = c.idcliente
       ORDER BY f.fecha DESC
     `);
-
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
+// 🔹 LISTAR FACTURAS
 // 🔹 FACTURA COMPLETA (PARA REIMPRESIÓN)
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
-
   try {
-    // 🧾 Cabecera
     const facturaRes = await pool.query(`
       SELECT 
         f.idfactura,
+        f.numerofactura, -- 🔥 Agregado para que no salga S/N
         f.fecha,
         f.total,
         f.pago,
@@ -44,13 +43,8 @@ router.get("/:id", async (req, res) => {
       WHERE f.idfactura = $1
     `, [id]);
 
-    // 📦 Detalles
     const detallesRes = await pool.query(`
-      SELECT 
-        p.nombre,
-        d.cantidad,
-        d.precio,
-        d.subtotal
+      SELECT p.nombre, d.cantidad, d.precio, d.subtotal
       FROM detalle_facturas d
       JOIN productos p ON p.idproducto = d.idproducto
       WHERE d.idfactura = $1
@@ -59,6 +53,7 @@ router.get("/:id", async (req, res) => {
     const factura = facturaRes.rows[0];
 
     res.json({
+      numerofactura: factura.numerofactura, // 🔥 Ahora se envía al frontend
       fecha: factura.fecha,
       total: factura.total,
       pago: factura.pago,
@@ -70,7 +65,6 @@ router.get("/:id", async (req, res) => {
       },
       detalles: detallesRes.rows
     });
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

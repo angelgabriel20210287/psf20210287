@@ -1,111 +1,105 @@
-/* ===============================
-   CONTENEDOR HISTORIAL
-================================ */
+/* =========================================
+   ESTILOS DE LA PÁGINA (PANTALLA)
+   ========================================= */
 
-.historial {
-  padding: 20px;
+.historial-container {
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.historial h2 {
+.historial-container h2 {
   text-align: center;
-  margin-bottom: 20px;
   color: #2c3e50;
+  margin-bottom: 25px;
 }
 
-/* ===============================
-   TABLA SOLO HISTORIAL
-================================ */
-
-.historial table {
+/* Tabla Moderna */
+.historial-table {
   width: 100%;
   border-collapse: collapse;
   background-color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.historial thead {
+.historial-table thead {
   background-color: #34495e;
   color: white;
 }
 
-.historial th,
-.historial td {
-  padding: 12px;
+.historial-table th, 
+.historial-table td {
+  padding: 15px;
   text-align: center;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #eee;
 }
 
-.historial tbody tr:hover {
-  background-color: #f2f2f2;
+.historial-table tbody tr:hover {
+  background-color: #f9f9f9;
 }
 
-/* ===============================
-   BOTONES SOLO HISTORIAL
-================================ */
-
-.historial button {
-  padding: 6px 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.historial .btn-reimprimir {
+/* Botones */
+.btn-reimprimir {
   background-color: #3498db;
   color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 8px;
 }
 
-.historial .btn-reimprimir:hover {
-  background-color: #2980b9;
-}
-
-.historial .btn-eliminar {
+.btn-eliminar {
   background-color: #e74c3c;
   color: white;
-  margin-left: 8px;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-.historial .btn-eliminar:hover {
-  background-color: #c0392b;
-}
-
-/* ===============================
-   FACTURA (OCULTA EN PANTALLA)
-================================ */
-
+/* OCULTAR LA FACTURA EN LA WEB NORMAL */
 .factura {
   display: none;
 }
 
-/* ===============================
-   SOLO IMPRESIÓN
-================================ */
-
+/* =========================================
+   LÓGICA DE IMPRESIÓN (TU LÓGICA PROBADA)
+   ========================================= */
 @media print {
-
   body {
     margin: 0;
     padding: 0;
   }
 
+  /* Oculta todo el sistema */
   body * {
     visibility: hidden;
   }
 
+  /* Muestra solo la factura y su contenido */
   .factura,
   .factura * {
-    visibility: visible;
+    visibility: visible !important;
   }
 
+  /* Posicionamiento de la factura */
   .factura {
-    display: block;
+    display: block !important;
     position: absolute;
     left: 0;
     top: 0;
-    width: 300px;
-    margin: 0 auto;
-    font-family: monospace;
-    font-size: 12px;
+    width: 210mm; /* Cambié de 300px a 210mm para que ocupe la hoja A4 completa */
+    margin: 0;
+    padding: 10mm;
+    font-family: Arial, sans-serif;
+  }
+
+  @page {
+    size: A4;
+    margin: 0;
   }
 }

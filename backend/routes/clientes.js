@@ -57,5 +57,15 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
+// 🔹 CONTAR CLIENTES
+router.get('/count', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT COUNT(*) FROM cliente'
+    );
+    res.json({ total: result.rows[0].count });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 module.exports = router;

@@ -67,7 +67,7 @@ const Reportes = () => {
 
   return (
     <div className="reportes-container">
-      <h1>📊 Reportes Inteligentes</h1>
+      <h1>📊 Reportes del sistema</h1>
 
       <div className="filtros">
         <input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} />

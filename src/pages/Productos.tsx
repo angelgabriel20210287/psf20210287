@@ -30,6 +30,16 @@ const Productos = () => {
   const [costo, setCosto] = useState("");
   const [idproveedor, setIdproveedor] = useState("");
 
+  // 🔹 Función para pedir el siguiente código al servidor
+  const sugerirCodigo = async () => {
+    try {
+      const res = await api.get("/productos/next-code");
+      setCodigo(res.data.nextCode);
+    } catch (error) {
+      console.error("Error al obtener código sugerido", error);
+    }
+  };
+
   // 🔹 Cargar productos
   const cargarProductos = async () => {
     const response = await api.get("/productos");
@@ -45,6 +55,7 @@ const Productos = () => {
   useEffect(() => {
     cargarProductos();
     cargarProveedores();
+    sugerirCodigo(); // 🔥 Sugerir código al cargar el componente
   }, []);
 
   // 🔹 Guardar / Actualizar producto
@@ -60,18 +71,27 @@ const Productos = () => {
       idproveedor: idproveedor ? Number(idproveedor) : null,
     };
 
-    if (productoEditando) {
-      await api.put(
-        `/productos/${productoEditando.idproducto}`,
-        nuevoProducto
-      );
-      setProductoEditando(null);
-    } else {
-      await api.post("/productos", nuevoProducto);
-    }
+    try {
+      if (productoEditando) {
+        await api.put(
+          `/productos/${productoEditando.idproducto}`,
+          nuevoProducto
+        );
+        setProductoEditando(null);
+      } else {
+        await api.post("/productos", nuevoProducto);
+      }
 
-    cargarProductos();
-    limpiarFormulario();
+      await cargarProductos();
+      limpiarFormulario();
+      // Solo sugerimos nuevo código si no estamos editando
+      if (!productoEditando) {
+        sugerirCodigo();
+      }
+    } catch (error) {
+      console.error("Error al guardar producto", error);
+      alert("Error al procesar la solicitud");
+    }
   };
 
   // 🔹 Editar producto
@@ -94,16 +114,19 @@ const Productos = () => {
 
     await api.delete(`/productos/${id}`);
     cargarProductos();
+    // Actualizamos la sugerencia de código por si el eliminado era el último
+    sugerirCodigo();
   };
 
   // 🔹 Limpiar formulario
   const limpiarFormulario = () => {
-    setCodigo("");
+    setCodigo(""); 
     setNombre("");
     setStock("");
     setPrecio("");
     setCosto("");
     setIdproveedor("");
+    setProductoEditando(null);
   };
 
   return (
@@ -164,9 +187,17 @@ const Productos = () => {
           ))}
         </select>
 
-        <button type="submit">
-          {productoEditando ? "Actualizar" : "Guardar Producto"}
-        </button>
+        <div className="form-buttons">
+          <button type="submit">
+            {productoEditando ? "Actualizar" : "Guardar Producto"}
+          </button>
+          
+          {productoEditando && (
+            <button type="button" onClick={limpiarFormulario}>
+              Cancelar Edición
+            </button>
+          )}
+        </div>
       </form>
 
       <hr />
@@ -175,13 +206,15 @@ const Productos = () => {
       <ul>
         {productos.map((p) => (
           <li key={p.idproducto}>
-            {p.codigo} - {p.nombre} | Stock: {p.stock} | 
+            <strong>{p.codigo}</strong> - {p.nombre} | Stock: {p.stock} | 
             Proveedor: {p.proveedor || "Sin proveedor"}
 
-            <button onClick={() => handleEditar(p)}>✏️</button>
-            <button onClick={() => handleEliminar(p.idproducto!)}>
-              🗑
-            </button>
+            <div className="list-actions">
+              <button onClick={() => handleEditar(p)}>✏️</button>
+              <button onClick={() => handleEliminar(p.idproducto!)}>
+                🗑
+              </button>
+            </div>
           </li>
         ))}
       </ul>

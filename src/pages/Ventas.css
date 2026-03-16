@@ -383,3 +383,70 @@
   transform: none !important;
   box-shadow: none !important;
 }
+
+/* --- COMPLEMENTOS PARA EL BUSCADOR Y LISTA --- */
+
+.busqueda-cliente-container { 
+    position: relative; 
+    max-width: 500px; 
+    margin-bottom: 20px; 
+}
+
+.dropdown-clientes {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #ff6b35;
+    border-radius: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 999;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    margin-top: 5px;
+}
+
+.dropdown-clientes div { 
+    padding: 14px 20px; 
+    cursor: pointer; 
+    border-bottom: 1px solid #f3f4f6; 
+    transition: background 0.2s;
+}
+
+.dropdown-clientes div:hover { 
+    background: #fff5f0; 
+    color: #ff6b35; 
+}
+
+.cliente-seleccionado {
+    background: #f1f5f9;
+    padding: 12px 20px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid #cbd5e1;
+    max-width: 500px;
+}
+
+.placeholder-ventas {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
+    font-style: italic;
+    border: 2px dashed #e5e7eb;
+    border-radius: 12px;
+    background: #f9fafb;
+}
+
+.caja-alerta {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    border: 1px solid #fca5a5;
+}

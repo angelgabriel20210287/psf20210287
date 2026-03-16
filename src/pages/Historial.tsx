@@ -7,7 +7,7 @@ interface FacturaLista {
   idfactura: number;
   numerofactura: string;
   fecha: string;
-  total: number;
+  total: number | string;
   cliente: string;
 }
 
@@ -19,34 +19,47 @@ const Historial = () => {
     cargarHistorial();
   }, []);
 
+  // EFECTO CRÍTICO: Dispara la impresión solo cuando el estado facturaPrint cambia
+  useEffect(() => {
+    if (facturaPrint) {
+      const timer = setTimeout(() => {
+        window.print();
+        setFacturaPrint(null); // Limpiamos para la próxima impresión
+      }, 500); // 500ms para asegurar renderizado de imagen/logo
+      return () => clearTimeout(timer);
+    }
+  }, [facturaPrint]);
+
   const cargarHistorial = async () => {
-    const res = await api.get("/historial");
-    setFacturas(res.data);
+    try {
+      const res = await api.get("/historial");
+      setFacturas(res.data);
+    } catch (error) {
+      console.error("Error al cargar historial:", error);
+    }
   };
 
   const eliminarFactura = async (id: number) => {
     const ok = window.confirm("¿Seguro que deseas eliminar esta factura?");
     if (!ok) return;
-
     await api.delete(`/historial/${id}`);
     setFacturas(prev => prev.filter(f => f.idfactura !== id));
   };
 
   const reimprimir = async (id: number) => {
-    const res = await api.get(`/historial/${id}`);
-    setFacturaPrint(res.data);
-
-    setTimeout(() => {
-      window.print();
-      setFacturaPrint(null);
-    }, 300);
+    try {
+      const res = await api.get(`/historial/${id}`);
+      setFacturaPrint(res.data); 
+    } catch (error) {
+      console.error("Error al obtener datos de factura:", error);
+    }
   };
 
   return (
-    <div className="historial">
+    <div className="historial-container">
       <h2>Historial de Ventas</h2>
 
-      <table>
+      <table className="historial-table">
         <thead>
           <tr>
             <th># Factura</th>
@@ -62,19 +75,12 @@ const Historial = () => {
               <td>{f.numerofactura}</td>
               <td>{f.cliente}</td>
               <td>{new Date(f.fecha).toLocaleDateString()}</td>
-              <td>${f.total}</td>
+              <td>RD$ {Number(f.total).toFixed(2)}</td>
               <td>
-                <button
-                  className="btn-reimprimir"
-                  onClick={() => reimprimir(f.idfactura)}
-                >
+                <button className="btn-reimprimir" onClick={() => reimprimir(f.idfactura)}>
                   Reimprimir
                 </button>
-
-                <button
-                  className="btn-eliminar"
-                  onClick={() => eliminarFactura(f.idfactura)}
-                >
+                <button className="btn-eliminar" onClick={() => eliminarFactura(f.idfactura)}>
                   Eliminar
                 </button>
               </td>
@@ -83,8 +89,12 @@ const Historial = () => {
         </tbody>
       </table>
 
-      {/* 👉 SOLO se renderiza para impresión */}
-      {facturaPrint && <FacturaPrint factura={facturaPrint} />}
+      {/* Renderizado condicional para impresión */}
+      {facturaPrint && (
+        <div className="print-only-wrapper">
+          <FacturaPrint factura={facturaPrint} />
+        </div>
+      )}
     </div>
   );
 };

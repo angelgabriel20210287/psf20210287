@@ -4,23 +4,47 @@ const pool = require("../db");
 
 // 🔹 REGISTRAR VENTA
 router.post("/", async (req, res) => {
-  const { idcliente, total, pago, cambio, detalles } = req.body;
+  // 1️⃣ Agregamos idcaja a los datos recibidos
+  const { idcliente, total, pago, cambio, detalles, idcaja } = req.body;
+
+  console.log("🔥 INSERTANDO FACTURA...");
+
+  // Validación básica
+  if (!detalles || !detalles.length) {
+    return res.status(400).json({ error: "No hay productos en la venta" });
+  }
+
+  // Validación de caja
+  if (!idcaja) {
+    return res.status(400).json({ error: "No se puede registrar una venta sin una caja abierta." });
+  }
+
   const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
 
-    // 1️⃣ Insertar factura
+    // 2️⃣ Insertar factura incluyendo el idcaja
     const facturaRes = await client.query(
-      `INSERT INTO facturas (idcliente, total, pago, cambio)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO facturas (idcliente, total, pago, cambio, idcaja)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING idfactura`,
-      [idcliente, total, pago, cambio]
+      [idcliente || null, total, pago, cambio, idcaja]
     );
 
     const idfactura = facturaRes.rows[0].idfactura;
 
-    // 2️⃣ Insertar detalles y descontar stock
+    // 3️⃣ Generar número de factura basado en el idfactura
+    const numeroFactura = `F-${String(idfactura).padStart(6, "0")}`;
+
+    await client.query(
+      `UPDATE facturas
+       SET numerofactura = $1
+       WHERE idfactura = $2`,
+      [numeroFactura, idfactura]
+    );
+
+    // 4️⃣ Insertar detalles y descontar stock
     for (const item of detalles) {
       const subtotal = item.cantidad * item.precio;
 
@@ -40,11 +64,18 @@ router.post("/", async (req, res) => {
     }
 
     await client.query("COMMIT");
-    res.json({ message: "Factura registrada correctamente" });
+
+    console.log(`✅ Factura ${numeroFactura} registrada correctamente`);
+
+    res.json({
+      message: "Factura registrada correctamente",
+      idfactura,
+      numerofactura: numeroFactura,
+    });
 
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error(error);
+    console.error("❌ Error en venta:", error);
     res.status(500).json({ error: "Error al registrar factura" });
   } finally {
     client.release();
@@ -67,8 +98,9 @@ router.delete("/:idfactura", async (req, res) => {
     );
 
     res.json({ message: "Factura eliminada correctamente" });
+
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error al eliminar factura:", error);
     res.status(500).json({ error: "Error al eliminar factura" });
   }
 });

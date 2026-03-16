@@ -32,12 +32,16 @@ const Ventas = () => {
   const [clienteId, setClienteId] = useState<number | null>(null);
 
   const [busqueda, setBusqueda] = useState("");
+  const [busquedaCliente, setBusquedaCliente] = useState("");
   const [carrito, setCarrito] = useState<VentaItem[]>([]);
 
   const [mostrarCobro, setMostrarCobro] = useState(false);
   const [mostrarFactura, setMostrarFactura] = useState(false);
   const [pagoCon, setPagoCon] = useState(0);
   const [facturaActual, setFacturaActual] = useState<any>(null);
+
+  const [cajaAbierta, setCajaAbierta] = useState(false);
+  const [idCajaActual, setIdCajaActual] = useState<number | null>(null);
 
   // 🔹 Cargar datos
   const cargarDatos = async () => {
@@ -54,12 +58,31 @@ const Ventas = () => {
     setClientes(cliRes.data);
   };
 
+  // 🔹 Verificar caja abierta
+  const verificarCaja = async () => {
+    try {
+      const res = await api.get("/api/caja/actual");
+      if (res.data) {
+        setCajaAbierta(true);
+        setIdCajaActual(res.data.idcaja);
+      } else {
+        setCajaAbierta(false);
+        setIdCajaActual(null);
+      }
+    } catch (error) {
+      console.error("Error verificando caja");
+    }
+  };
+
   useEffect(() => {
     cargarDatos();
+    verificarCaja();
   }, []);
 
-  const clienteSeleccionado =
-    clientes.find((c) => c.idcliente === clienteId) ?? null;
+  // 🔹 Lógica de filtrado
+  const clientesFiltrados = clientes.filter((c) =>
+    c.nombre.toLowerCase().includes(busquedaCliente.toLowerCase())
+  );
 
   const productosFiltrados = productos.filter(
     (p) =>
@@ -67,21 +90,15 @@ const Ventas = () => {
       p.codigo.toLowerCase().includes(busqueda.toLowerCase())
   );
 
-  // 🛒 AGREGAR PRODUCTO
   const agregarProducto = (producto: Producto) => {
     const existe = carrito.find((i) => i.idproducto === producto.idproducto);
 
     if (existe) {
       if (existe.cantidad >= producto.stock) return;
-
       setCarrito((prev) =>
         prev.map((i) =>
           i.idproducto === producto.idproducto
-            ? {
-                ...i,
-                cantidad: i.cantidad + 1,
-                subtotal: (i.cantidad + 1) * i.precio,
-              }
+            ? { ...i, cantidad: i.cantidad + 1, subtotal: (i.cantidad + 1) * i.precio }
             : i
         )
       );
@@ -120,13 +137,20 @@ const Ventas = () => {
   const cambio = pagoCon - total;
 
   // 💰 PROCESAR VENTA
+  // 💰 PROCESAR VENTA - Ajuste para limpiar campos
   const procesarCobro = async (imprimir: boolean) => {
     try {
+      if (!cajaAbierta || !idCajaActual) {
+        alert("Debe abrir caja antes de vender");
+        return;
+      }
+
       const venta = {
         idcliente: clienteId,
         total,
         pago: pagoCon,
         cambio,
+        idcaja: idCajaActual,
         detalles: carrito.map((i) => ({
           idproducto: i.idproducto,
           cantidad: i.cantidad,
@@ -134,13 +158,18 @@ const Ventas = () => {
         })),
       };
 
-      await api.post("/ventas", venta);
+      const response = await api.post("/ventas", venta);
+      const { numerofactura } = response.data;
 
       setFacturaActual({
+        numerofactura: numerofactura,
         cliente:
-          clienteSeleccionado ??
-          { nombre: "Consumidor Final", telefono: "N/A", direccion: "N/A" },
-        fecha: new Date().toLocaleString(),
+          clientes.find((c) => c.idcliente === clienteId) ?? {
+            nombre: "Consumidor Final",
+            telefono: "N/A",
+            direccion: "N/A",
+          },
+        fecha: new Date(),
         total,
         pago: pagoCon,
         cambio,
@@ -154,12 +183,17 @@ const Ventas = () => {
         setTimeout(() => {
           window.print();
           setMostrarFactura(false);
-        }, 500);
+        }, 700);
       }
 
+      // --- AQUÍ ESTÁ EL CAMBIO PARA LIMPIAR TODO ---
       setCarrito([]);
       setPagoCon(0);
-      cargarDatos(); // 🔥 refresca stock
+      setClienteId(null);       // Limpia la selección del cliente
+      setBusquedaCliente("");   // Limpia el buscador de clientes
+      setBusqueda("");          // Limpia el buscador de productos
+      cargarDatos();            // Recarga stock y datos
+
     } catch (error) {
       console.error(error);
       alert("❌ Error al registrar la venta");
@@ -170,20 +204,39 @@ const Ventas = () => {
     <div className="ventas-container">
       <h2>Ventas</h2>
 
-      <label>Cliente</label>
-      <select
-        value={clienteId ?? ""}
-        onChange={(e) =>
-          setClienteId(e.target.value ? Number(e.target.value) : null)
-        }
-      >
-        <option value="">Consumidor Final</option>
-        {clientes.map((c) => (
-          <option key={c.idcliente} value={c.idcliente}>
-            {c.nombre}
-          </option>
-        ))}
-      </select>
+      {!cajaAbierta && (
+        <div className="caja-alerta">
+          ⚠ Debe abrir la caja antes de realizar ventas.
+        </div>
+      )}
+
+      {/* 🔹 NUEVO BUSCADOR DE CLIENTES */}
+      <div className="busqueda-cliente-container">
+        <label>Cliente</label>
+        {!clienteId ? (
+          <>
+            <input
+              placeholder="Buscar cliente..."
+              value={busquedaCliente}
+              onChange={(e) => setBusquedaCliente(e.target.value)}
+            />
+            {busquedaCliente && (
+              <div className="dropdown-clientes">
+                {clientesFiltrados.map((c) => (
+                  <div key={c.idcliente} onClick={() => { setClienteId(c.idcliente); setBusquedaCliente(c.nombre); }}>
+                    {c.nombre}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="cliente-seleccionado">
+            <span>👤 {busquedaCliente}</span>
+            <button onClick={() => { setClienteId(null); setBusquedaCliente(""); }}>Cambiar</button>
+          </div>
+        )}
+      </div>
 
       <input
         placeholder="Buscar producto..."
@@ -192,15 +245,19 @@ const Ventas = () => {
       />
 
       <div className="productos-lista">
-        {productosFiltrados.map((p) => (
-          <button
-            key={p.idproducto}
-            disabled={p.stock === 0}
-            onClick={() => agregarProducto(p)}
-          >
-            {p.nombre} (RD$ {p.precio})
-          </button>
-        ))}
+        {busqueda === "" ? (
+          <div className="placeholder-ventas">🔍 Escriba para buscar productos...</div>
+        ) : (
+          productosFiltrados.map((p) => (
+            <button
+              key={p.idproducto}
+              disabled={p.stock === 0}
+              onClick={() => agregarProducto(p)}
+            >
+              {p.nombre} (RD$ {p.precio})
+            </button>
+          ))
+        )}
       </div>
 
       <table>
@@ -221,17 +278,13 @@ const Ventas = () => {
                 <input
                   type="number"
                   value={i.cantidad}
-                  onChange={(e) =>
-                    cambiarCantidad(i.idproducto, Number(e.target.value))
-                  }
+                  onChange={(e) => cambiarCantidad(i.idproducto, Number(e.target.value))}
                 />
               </td>
               <td>RD$ {i.precio}</td>
               <td>RD$ {i.subtotal}</td>
               <td>
-                <button onClick={() => eliminarItem(i.idproducto)}>
-                  Eliminar
-                </button>
+                <button onClick={() => eliminarItem(i.idproducto)}>Eliminar</button>
               </td>
             </tr>
           ))}
@@ -240,7 +293,10 @@ const Ventas = () => {
 
       <h3>Total: RD$ {total}</h3>
 
-      <button disabled={!carrito.length} onClick={() => setMostrarCobro(true)}>
+      <button
+        disabled={!carrito.length || !cajaAbierta}
+        onClick={() => setMostrarCobro(true)}
+      >
         Cobrar
       </button>
 
@@ -252,17 +308,13 @@ const Ventas = () => {
             value={pagoCon}
             onChange={(e) => setPagoCon(Number(e.target.value))}
           />
-
           <h4>Cambio: RD$ {cambio >= 0 ? cambio : 0}</h4>
-
           <button disabled={cambio < 0} onClick={() => procesarCobro(true)}>
             Cobrar e imprimir
           </button>
-
           <button disabled={cambio < 0} onClick={() => procesarCobro(false)}>
             Cobrar sin imprimir
           </button>
-
           <button onClick={() => setMostrarCobro(false)}>Cancelar</button>
         </div>
       )}

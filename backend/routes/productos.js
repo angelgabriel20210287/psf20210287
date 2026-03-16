@@ -65,5 +65,43 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+// 🔹 CONTAR PRODUCTOS
+router.get('/count', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT COUNT(*) FROM productos'
+    );
+    res.json({ total: result.rows[0].count });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 🔹 OBTENER EL SIGUIENTE CÓDIGO SUGERIDO
+router.get('/next-code', async (req, res) => {
+  try {
+    // Buscamos el código que tenga el valor numérico más alto
+    // Usamos regex para asegurar que solo evaluamos códigos que sean números
+    const result = await pool.query(`
+      SELECT codigo 
+      FROM productos 
+      WHERE codigo ~ '^[0-9]+$' 
+      ORDER BY CAST(codigo AS INTEGER) DESC 
+      LIMIT 1
+    `);
+
+    let siguienteCodigo = "01"; // Por defecto si no hay productos
+
+    if (result.rows.length > 0) {
+      const ultimoCodigoNum = parseInt(result.rows[0].codigo);
+      // Sumamos 1 y formateamos a 2 dígitos (ej: 09 -> 10)
+      siguienteCodigo = String(ultimoCodigoNum + 1).padStart(2, '0');
+    }
+
+    res.json({ nextCode: siguienteCodigo });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 module.exports = router;

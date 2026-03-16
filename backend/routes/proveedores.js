@@ -56,5 +56,16 @@ router.put('/:id', async (req, res) => {
 
   res.json({ message: "Proveedor actualizado" });
 });
+// 🔹 CONTAR PROVEEDORES
+router.get('/count', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT COUNT(*) FROM proveedores'
+    );
+    res.json({ total: result.rows[0].count });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 module.exports = router;
