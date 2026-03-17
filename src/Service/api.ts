@@ -1,8 +1,7 @@
-import axios from "axios";
+import axios from 'axios';
 
 const api = axios.create({
-  // URL de tu API en Render
-  baseURL: "https://sistema-facturacion-api-xkh7.onrender.com",
+  baseURL: 'http://localhost:3001',
 });
 
 export default api;
