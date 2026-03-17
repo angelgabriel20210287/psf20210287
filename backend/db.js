@@ -6,10 +6,6 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   port: process.env.DB_PORT,
-  // 🔥 AÑADE ESTO PARA QUE FUNCIONE EN LA NUBE
-  ssl: {
-    rejectUnauthorized: false
-  }
 });
 
 module.exports = pool;

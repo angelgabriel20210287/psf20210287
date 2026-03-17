@@ -16,10 +16,6 @@ const app = express();
 
 app.use(cors());
 
-app.get("/", (req, res) => {
-  res.send("API Sistema de Facturación funcionando 🚀");
-});
-
 // 🔥 IMPORTANTE PARA IMÁGENES BASE64
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -43,8 +39,6 @@ app.use("/empresa", require("./routes/empresa"));
 app.use("/api/caja", cajaRoutes);
 
 // 🔹 Servidor
-const PORT = process.env.PORT || 3001;
-
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
+app.listen(3001, () => {
+  console.log("Servidor corriendo en http://localhost:3001");
 });
