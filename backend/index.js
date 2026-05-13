@@ -11,6 +11,7 @@ const proveedoresRoutes = require("./routes/proveedores");
 const inventarioRoutes = require("./routes/inventario");
 const reportesRoutes = require("./routes/reportes");
 const cajaRoutes = require("./routes/caja");
+const creditosRoutes = require("./routes/creditos");
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use("/inventario-movimientos", inventarioRoutes);
 app.use("/reportes", reportesRoutes);
 app.use("/empresa", require("./routes/empresa"));
 app.use("/api/caja", cajaRoutes);
+app.use("/creditos", creditosRoutes);
 
 // 🔹 Servidor
 app.listen(3001, () => {

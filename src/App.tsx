@@ -13,6 +13,7 @@ import Proveedores from "./pages/Proveedores";
 import InventarioMovimiento from "./pages/InventarioMovimiento";
 import Configuracion from "./pages/Configuracion";
 import Caja from "./pages/Caja";
+import Creditos from "./pages/Creditos"; 
 
 function App() {
   const [autenticado, setAutenticado] = useState(
@@ -49,6 +50,7 @@ function App() {
               usuario.rol === "administrador" ||
               usuario.rol === "jefe") && (
               <>
+                <Route path="/Creditos" element={<Creditos />} />
                 <Route path="/ventas" element={<Ventas />} />
                 <Route path="/historial" element={<Historial />} />
                 <Route path="/clientes" element={<Clientes />} />

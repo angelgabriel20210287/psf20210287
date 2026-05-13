@@ -2,15 +2,17 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
-// 🔹 Obtener todos los productos con nombre del proveedor
+// 🔹 Obtener todos los productos con nombre del proveedor (con filtro opcional por tipo)
 router.get('/', async (req, res) => {
+  const { tipo } = req.query; // ?tipo=nuevo o ?tipo=usado
   try {
     const result = await pool.query(`
       SELECT p.*, pr.nombre AS proveedor
       FROM productos p
       LEFT JOIN proveedores pr ON p.idproveedor = pr.idproveedor
+      ${tipo ? "WHERE p.tipo_inventario = $1" : ""}
       ORDER BY p.idproducto
-    `);
+    `, tipo ? [tipo] : []);
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -19,13 +21,13 @@ router.get('/', async (req, res) => {
 
 // 🔹 Crear producto
 router.post('/', async (req, res) => {
-  const { codigo, nombre, stock, precio, costo, idproveedor } = req.body;
+  const { codigo, nombre, stock, precio, costo, idproveedor, tipo_inventario } = req.body;
 
   try {
     const result = await pool.query(
-      `INSERT INTO productos (codigo, nombre, stock, precio, costo, idproveedor)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [codigo, nombre, stock, precio, costo, idproveedor || null]
+      `INSERT INTO productos (codigo, nombre, stock, precio, costo, idproveedor, tipo_inventario)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [codigo, nombre, stock, precio, costo, idproveedor || null, tipo_inventario || 'nuevo']
     );
     res.json(result.rows[0]);
   } catch (error) {
@@ -36,14 +38,14 @@ router.post('/', async (req, res) => {
 // 🔹 Editar producto
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
-  const { codigo, nombre, stock, precio, costo, idproveedor } = req.body;
+  const { codigo, nombre, stock, precio, costo, idproveedor, tipo_inventario } = req.body;
 
   try {
     await pool.query(
       `UPDATE productos
-       SET codigo=$1, nombre=$2, stock=$3, precio=$4, costo=$5, idproveedor=$6
-       WHERE idproducto=$7`,
-      [codigo, nombre, stock, precio, costo, idproveedor || null, id]
+       SET codigo=$1, nombre=$2, stock=$3, precio=$4, costo=$5, idproveedor=$6, tipo_inventario=$7
+       WHERE idproducto=$8`,
+      [codigo, nombre, stock, precio, costo, idproveedor || null, tipo_inventario || 'nuevo', id]
     );
     res.json({ message: 'Producto actualizado' });
   } catch (error) {
@@ -65,6 +67,7 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 // 🔹 CONTAR PRODUCTOS
 router.get('/count', async (req, res) => {
   try {
@@ -80,8 +83,6 @@ router.get('/count', async (req, res) => {
 // 🔹 OBTENER EL SIGUIENTE CÓDIGO SUGERIDO
 router.get('/next-code', async (req, res) => {
   try {
-    // Buscamos el código que tenga el valor numérico más alto
-    // Usamos regex para asegurar que solo evaluamos códigos que sean números
     const result = await pool.query(`
       SELECT codigo 
       FROM productos 
@@ -90,11 +91,10 @@ router.get('/next-code', async (req, res) => {
       LIMIT 1
     `);
 
-    let siguienteCodigo = "01"; // Por defecto si no hay productos
+    let siguienteCodigo = "01";
 
     if (result.rows.length > 0) {
       const ultimoCodigoNum = parseInt(result.rows[0].codigo);
-      // Sumamos 1 y formateamos a 2 dígitos (ej: 09 -> 10)
       siguienteCodigo = String(ultimoCodigoNum + 1).padStart(2, '0');
     }
 

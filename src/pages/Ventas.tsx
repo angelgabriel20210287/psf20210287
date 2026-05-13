@@ -9,6 +9,7 @@ interface Producto {
   nombre: string;
   precio: number;
   stock: number;
+  tipo_inventario: string;
 }
 
 interface Cliente {
@@ -37,28 +38,39 @@ const Ventas = () => {
 
   const [mostrarCobro, setMostrarCobro] = useState(false);
   const [mostrarFactura, setMostrarFactura] = useState(false);
-  const [pagoCon, setPagoCon] = useState(0);
+
+  // 🔹 pagoCon como string para manejar el input correctamente
+  const [pagoCon, setPagoCon] = useState<string>("");
+
   const [facturaActual, setFacturaActual] = useState<any>(null);
 
   const [cajaAbierta, setCajaAbierta] = useState(false);
   const [idCajaActual, setIdCajaActual] = useState<number | null>(null);
 
-  // 🔹 Cargar datos
-  const cargarDatos = async () => {
-    const prodRes = await api.get("/productos");
-    const cliRes = await api.get("/clientes");
+  const [tipoInventario, setTipoInventario] = useState("nuevo");
+  const [tipoPago, setTipoPago] = useState<"contado" | "credito">("contado");
 
+  // 🔹 Calcular total y cambio en tiempo real
+  const total = carrito.reduce((sum, i) => sum + i.subtotal, 0);
+  const pagoNum = parseFloat(pagoCon) || 0;
+  const cambio = pagoNum - total;
+  const cambioValido = cambio >= 0 && pagoNum > 0;
+
+  const cargarProductos = async (tipo: string) => {
+    const prodRes = await api.get(`/productos?tipo=${tipo}`);
     const productosParseados = prodRes.data.map((p: any) => ({
       ...p,
       precio: Number(p.precio),
       stock: Number(p.stock),
     }));
-
     setProductos(productosParseados);
+  };
+
+  const cargarClientes = async () => {
+    const cliRes = await api.get("/clientes");
     setClientes(cliRes.data);
   };
 
-  // 🔹 Verificar caja abierta
   const verificarCaja = async () => {
     try {
       const res = await api.get("/api/caja/actual");
@@ -75,11 +87,23 @@ const Ventas = () => {
   };
 
   useEffect(() => {
-    cargarDatos();
+    cargarProductos("nuevo");
+    cargarClientes();
     verificarCaja();
   }, []);
 
-  // 🔹 Lógica de filtrado
+  useEffect(() => {
+    cargarProductos(tipoInventario);
+    setBusqueda("");
+    setCarrito([]);
+  }, [tipoInventario]);
+
+  // 🔹 Limpiar el campo de pago al abrir el modal
+  const abrirModalCobro = () => {
+    setPagoCon("");
+    setMostrarCobro(true);
+  };
+
   const clientesFiltrados = clientes.filter((c) =>
     c.nombre.toLowerCase().includes(busquedaCliente.toLowerCase())
   );
@@ -92,7 +116,6 @@ const Ventas = () => {
 
   const agregarProducto = (producto: Producto) => {
     const existe = carrito.find((i) => i.idproducto === producto.idproducto);
-
     if (existe) {
       if (existe.cantidad >= producto.stock) return;
       setCarrito((prev) =>
@@ -119,7 +142,6 @@ const Ventas = () => {
   const cambiarCantidad = (idproducto: number, cantidad: number) => {
     const producto = productos.find((p) => p.idproducto === idproducto);
     if (!producto || cantidad < 1 || cantidad > producto.stock) return;
-
     setCarrito((prev) =>
       prev.map((i) =>
         i.idproducto === idproducto
@@ -133,11 +155,6 @@ const Ventas = () => {
     setCarrito((prev) => prev.filter((i) => i.idproducto !== idproducto));
   };
 
-  const total = carrito.reduce((sum, i) => sum + i.subtotal, 0);
-  const cambio = pagoCon - total;
-
-  // 💰 PROCESAR VENTA
-  // 💰 PROCESAR VENTA - Ajuste para limpiar campos
   const procesarCobro = async (imprimir: boolean) => {
     try {
       if (!cajaAbierta || !idCajaActual) {
@@ -145,12 +162,18 @@ const Ventas = () => {
         return;
       }
 
+      if (tipoPago === "credito" && !clienteId) {
+        alert("⚠️ Las ventas a crédito requieren seleccionar un cliente.");
+        return;
+      }
+
       const venta = {
         idcliente: clienteId,
         total,
-        pago: pagoCon,
-        cambio,
+        pago: tipoPago === "contado" ? pagoNum : 0,
+        cambio: tipoPago === "contado" ? cambio : 0,
         idcaja: idCajaActual,
+        tipo_pago: tipoPago,
         detalles: carrito.map((i) => ({
           idproducto: i.idproducto,
           cantidad: i.cantidad,
@@ -161,18 +184,20 @@ const Ventas = () => {
       const response = await api.post("/ventas", venta);
       const { numerofactura } = response.data;
 
+      const clienteActual = clientes.find((c) => c.idcliente === clienteId) ?? {
+        nombre: "Consumidor Final",
+        telefono: "N/A",
+        direccion: "N/A",
+      };
+
       setFacturaActual({
-        numerofactura: numerofactura,
-        cliente:
-          clientes.find((c) => c.idcliente === clienteId) ?? {
-            nombre: "Consumidor Final",
-            telefono: "N/A",
-            direccion: "N/A",
-          },
+        numerofactura,
+        cliente: clienteActual,
         fecha: new Date(),
         total,
-        pago: pagoCon,
-        cambio,
+        pago: tipoPago === "contado" ? pagoNum : 0,
+        cambio: tipoPago === "contado" ? cambio : 0,
+        tipo_pago: tipoPago,
         detalles: carrito,
       });
 
@@ -186,17 +211,19 @@ const Ventas = () => {
         }, 700);
       }
 
-      // --- AQUÍ ESTÁ EL CAMBIO PARA LIMPIAR TODO ---
+      // Limpiar todo
       setCarrito([]);
-      setPagoCon(0);
-      setClienteId(null);       // Limpia la selección del cliente
-      setBusquedaCliente("");   // Limpia el buscador de clientes
-      setBusqueda("");          // Limpia el buscador de productos
-      cargarDatos();            // Recarga stock y datos
+      setPagoCon("");
+      setClienteId(null);
+      setBusquedaCliente("");
+      setBusqueda("");
+      setTipoPago("contado");
+      cargarProductos(tipoInventario);
+      cargarClientes();
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("❌ Error al registrar la venta");
+      alert(`❌ ${error.response?.data?.error || "Error al registrar la venta"}`);
     }
   };
 
@@ -210,9 +237,52 @@ const Ventas = () => {
         </div>
       )}
 
-      {/* 🔹 NUEVO BUSCADOR DE CLIENTES */}
+      {/* SELECTOR TIPO DE PAGO */}
+      <div className="selector-tipo-pago">
+        <button
+          className={tipoPago === "contado" ? "pago-btn activo-contado" : "pago-btn"}
+          onClick={() => setTipoPago("contado")}
+        >
+          💵 Al Contado
+        </button>
+        <button
+          className={tipoPago === "credito" ? "pago-btn activo-credito" : "pago-btn"}
+          onClick={() => setTipoPago("credito")}
+        >
+          📋 A Crédito
+        </button>
+      </div>
+
+      {tipoPago === "credito" && (
+        <div className="credito-aviso">
+          📋 Venta a crédito — El cliente debe estar registrado y la deuda quedará pendiente de pago.
+        </div>
+      )}
+
+      {/* SELECTOR INVENTARIO */}
+      <div className="selector-inventario">
+        <button
+          className={tipoInventario === "nuevo" ? "inv-btn activo-nuevo" : "inv-btn"}
+          onClick={() => setTipoInventario("nuevo")}
+        >
+          🔵 Piezas Nuevas
+        </button>
+        <button
+          className={tipoInventario === "usado" ? "inv-btn activo-usado" : "inv-btn"}
+          onClick={() => setTipoInventario("usado")}
+        >
+          🟠 Piezas Usadas
+        </button>
+      </div>
+
+      {/* BUSCADOR DE CLIENTES */}
       <div className="busqueda-cliente-container">
-        <label>Cliente</label>
+        <label>
+          Cliente{" "}
+          {tipoPago === "credito" && (
+            <span className="requerido">* Requerido para crédito</span>
+          )}
+        </label>
         {!clienteId ? (
           <>
             <input
@@ -223,7 +293,13 @@ const Ventas = () => {
             {busquedaCliente && (
               <div className="dropdown-clientes">
                 {clientesFiltrados.map((c) => (
-                  <div key={c.idcliente} onClick={() => { setClienteId(c.idcliente); setBusquedaCliente(c.nombre); }}>
+                  <div
+                    key={c.idcliente}
+                    onClick={() => {
+                      setClienteId(c.idcliente);
+                      setBusquedaCliente(c.nombre);
+                    }}
+                  >
                     {c.nombre}
                   </div>
                 ))}
@@ -233,20 +309,26 @@ const Ventas = () => {
         ) : (
           <div className="cliente-seleccionado">
             <span>👤 {busquedaCliente}</span>
-            <button onClick={() => { setClienteId(null); setBusquedaCliente(""); }}>Cambiar</button>
+            <button onClick={() => { setClienteId(null); setBusquedaCliente(""); }}>
+              Cambiar
+            </button>
           </div>
         )}
       </div>
 
+      {/* BUSCADOR DE PRODUCTOS */}
       <input
-        placeholder="Buscar producto..."
+        placeholder={`Buscar en ${tipoInventario === "nuevo" ? "Piezas Nuevas" : "Piezas Usadas"}...`}
         value={busqueda}
         onChange={(e) => setBusqueda(e.target.value)}
       />
 
       <div className="productos-lista">
         {busqueda === "" ? (
-          <div className="placeholder-ventas">🔍 Escriba para buscar productos...</div>
+          <div className="placeholder-ventas">
+            🔍 Escriba para buscar productos en{" "}
+            {tipoInventario === "nuevo" ? "🔵 Piezas Nuevas" : "🟠 Piezas Usadas"}...
+          </div>
         ) : (
           productosFiltrados.map((p) => (
             <button
@@ -260,6 +342,7 @@ const Ventas = () => {
         )}
       </div>
 
+      {/* CARRITO */}
       <table>
         <thead>
           <tr>
@@ -295,27 +378,79 @@ const Ventas = () => {
 
       <button
         disabled={!carrito.length || !cajaAbierta}
-        onClick={() => setMostrarCobro(true)}
+        onClick={abrirModalCobro}
       >
-        Cobrar
+        {tipoPago === "credito" ? "📋 Registrar a Crédito" : "💵 Cobrar"}
       </button>
 
+      {/* MODAL DE COBRO */}
       {mostrarCobro && (
         <div className="cobro-modal">
-          <input
-            type="number"
-            placeholder="Pagó con..."
-            value={pagoCon}
-            onChange={(e) => setPagoCon(Number(e.target.value))}
-          />
-          <h4>Cambio: RD$ {cambio >= 0 ? cambio : 0}</h4>
-          <button disabled={cambio < 0} onClick={() => procesarCobro(true)}>
-            Cobrar e imprimir
-          </button>
-          <button disabled={cambio < 0} onClick={() => procesarCobro(false)}>
-            Cobrar sin imprimir
-          </button>
-          <button onClick={() => setMostrarCobro(false)}>Cancelar</button>
+          {tipoPago === "contado" ? (
+            <>
+              <h4>💵 Pago al Contado</h4>
+
+              {/* Total a cobrar */}
+              <div className="cobro-total-display">
+                <span className="cobro-total-label">Total a cobrar</span>
+                <span className="cobro-total-valor">RD$ {total.toFixed(2)}</span>
+              </div>
+
+              {/* Input de pago */}
+              <input
+                type="number"
+                placeholder="¿Con cuánto paga el cliente?"
+                value={pagoCon}
+                onChange={(e) => setPagoCon(e.target.value)}
+                autoFocus
+                min={0}
+              />
+
+              {/* Cambio en tiempo real */}
+              <div className={`cobro-cambio-display ${cambioValido ? "cambio-ok" : pagoNum > 0 ? "cambio-error" : "cambio-neutro"}`}>
+                <span className="cobro-cambio-label">
+                  {pagoNum === 0
+                    ? "💬 Ingrese el monto recibido"
+                    : cambioValido
+                    ? "✅ Cambio a devolver"
+                    : "❌ Monto insuficiente"}
+                </span>
+                {pagoNum > 0 && (
+                  <span className="cobro-cambio-valor">
+                    RD$ {cambioValido ? cambio.toFixed(2) : (pagoNum - total).toFixed(2)}
+                  </span>
+                )}
+              </div>
+
+              <button
+                disabled={!cambioValido}
+                onClick={() => procesarCobro(true)}
+              >
+                Cobrar e imprimir
+              </button>
+              <button
+                disabled={!cambioValido}
+                onClick={() => procesarCobro(false)}
+              >
+                Cobrar sin imprimir
+              </button>
+              <button onClick={() => setMostrarCobro(false)}>Cancelar</button>
+            </>
+          ) : (
+            <>
+              <h4>📋 Confirmar Venta a Crédito</h4>
+              <div className="credito-resumen">
+                <p>👤 Cliente: <strong>{busquedaCliente || "Sin cliente"}</strong></p>
+                <p>💰 Total a crédito: <strong>RD$ {total.toFixed(2)}</strong></p>
+                <p style={{ color: "#e65100", fontSize: 13 }}>
+                  ⚠️ Esta deuda quedará registrada como pendiente de pago.
+                </p>
+              </div>
+              <button onClick={() => procesarCobro(true)}>Registrar e imprimir</button>
+              <button onClick={() => procesarCobro(false)}>Registrar sin imprimir</button>
+              <button onClick={() => setMostrarCobro(false)}>Cancelar</button>
+            </>
+          )}
         </div>
       )}
 

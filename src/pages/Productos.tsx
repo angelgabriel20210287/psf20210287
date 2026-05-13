@@ -10,7 +10,8 @@ interface Product {
   precio: number;
   costo: number;
   idproveedor?: number | null;
-  proveedor?: string; // viene del JOIN
+  proveedor?: string;
+  tipo_inventario: string;
 }
 
 interface Proveedor {
@@ -29,8 +30,9 @@ const Productos = () => {
   const [precio, setPrecio] = useState("");
   const [costo, setCosto] = useState("");
   const [idproveedor, setIdproveedor] = useState("");
+  const [tipoInventario, setTipoInventario] = useState("nuevo");
 
-  // 🔹 Función para pedir el siguiente código al servidor
+  // 🔹 Sugerir código
   const sugerirCodigo = async () => {
     try {
       const res = await api.get("/productos/next-code");
@@ -55,7 +57,7 @@ const Productos = () => {
   useEffect(() => {
     cargarProductos();
     cargarProveedores();
-    sugerirCodigo(); // 🔥 Sugerir código al cargar el componente
+    sugerirCodigo();
   }, []);
 
   // 🔹 Guardar / Actualizar producto
@@ -69,14 +71,12 @@ const Productos = () => {
       precio: Number(precio),
       costo: Number(costo),
       idproveedor: idproveedor ? Number(idproveedor) : null,
+      tipo_inventario: tipoInventario,
     };
 
     try {
       if (productoEditando) {
-        await api.put(
-          `/productos/${productoEditando.idproducto}`,
-          nuevoProducto
-        );
+        await api.put(`/productos/${productoEditando.idproducto}`, nuevoProducto);
         setProductoEditando(null);
       } else {
         await api.post("/productos", nuevoProducto);
@@ -84,7 +84,6 @@ const Productos = () => {
 
       await cargarProductos();
       limpiarFormulario();
-      // Solo sugerimos nuevo código si no estamos editando
       if (!productoEditando) {
         sugerirCodigo();
       }
@@ -103,37 +102,38 @@ const Productos = () => {
     setPrecio(String(p.precio));
     setCosto(String(p.costo));
     setIdproveedor(p.idproveedor ? String(p.idproveedor) : "");
+    setTipoInventario(p.tipo_inventario || "nuevo");
   };
 
   // 🔹 Eliminar producto
   const handleEliminar = async (id: number) => {
-    const confirmar = window.confirm(
-      "¿Seguro que deseas eliminar este producto?"
-    );
+    const confirmar = window.confirm("¿Seguro que deseas eliminar este producto?");
     if (!confirmar) return;
 
     await api.delete(`/productos/${id}`);
     cargarProductos();
-    // Actualizamos la sugerencia de código por si el eliminado era el último
     sugerirCodigo();
   };
 
   // 🔹 Limpiar formulario
   const limpiarFormulario = () => {
-    setCodigo(""); 
+    setCodigo("");
     setNombre("");
     setStock("");
     setPrecio("");
     setCosto("");
     setIdproveedor("");
+    setTipoInventario("nuevo");
     setProductoEditando(null);
   };
 
+  // 🔹 Separar productos por tipo para el listado
+  const productosNuevos = productos.filter((p) => p.tipo_inventario === "nuevo");
+  const productosUsados = productos.filter((p) => p.tipo_inventario === "usado");
+
   return (
     <div className="productos-container">
-      <h2>
-        {productoEditando ? "Editar Producto" : "Registro de Productos"}
-      </h2>
+      <h2>{productoEditando ? "Editar Producto" : "Registro de Productos"}</h2>
 
       <form className="productos-form" onSubmit={handleSubmit}>
         <input
@@ -187,11 +187,20 @@ const Productos = () => {
           ))}
         </select>
 
+        {/* 🔹 Selector de tipo de inventario */}
+        <select
+          value={tipoInventario}
+          onChange={(e) => setTipoInventario(e.target.value)}
+        >
+          <option value="nuevo">🔵 Piezas Nuevas</option>
+          <option value="usado">🟠 Piezas Usadas</option>
+        </select>
+
         <div className="form-buttons">
           <button type="submit">
             {productoEditando ? "Actualizar" : "Guardar Producto"}
           </button>
-          
+
           {productoEditando && (
             <button type="button" onClick={limpiarFormulario}>
               Cancelar Edición
@@ -202,21 +211,44 @@ const Productos = () => {
 
       <hr />
 
-      <h3>Listado de Productos</h3>
+      {/* 🔵 INVENTARIO 1 — PIEZAS NUEVAS */}
+      <h3>🔵 Inventario 1 — Piezas Nuevas</h3>
       <ul>
-        {productos.map((p) => (
-          <li key={p.idproducto}>
-            <strong>{p.codigo}</strong> - {p.nombre} | Stock: {p.stock} | 
-            Proveedor: {p.proveedor || "Sin proveedor"}
+        {productosNuevos.length === 0 ? (
+          <li>No hay productos nuevos registrados.</li>
+        ) : (
+          productosNuevos.map((p) => (
+            <li key={p.idproducto}>
+              <strong>{p.codigo}</strong> - {p.nombre} | Stock: {p.stock} |
+              Proveedor: {p.proveedor || "Sin proveedor"}
+              <div className="list-actions">
+                <button onClick={() => handleEditar(p)}>✏️</button>
+                <button onClick={() => handleEliminar(p.idproducto!)}>🗑</button>
+              </div>
+            </li>
+          ))
+        )}
+      </ul>
 
-            <div className="list-actions">
-              <button onClick={() => handleEditar(p)}>✏️</button>
-              <button onClick={() => handleEliminar(p.idproducto!)}>
-                🗑
-              </button>
-            </div>
-          </li>
-        ))}
+      <hr />
+
+      {/* 🟠 INVENTARIO 2 — PIEZAS USADAS */}
+      <h3>🟠 Inventario 2 — Piezas Usadas</h3>
+      <ul>
+        {productosUsados.length === 0 ? (
+          <li>No hay productos usados registrados.</li>
+        ) : (
+          productosUsados.map((p) => (
+            <li key={p.idproducto}>
+              <strong>{p.codigo}</strong> - {p.nombre} | Stock: {p.stock} |
+              Proveedor: {p.proveedor || "Sin proveedor"}
+              <div className="list-actions">
+                <button onClick={() => handleEditar(p)}>✏️</button>
+                <button onClick={() => handleEliminar(p.idproducto!)}>🗑</button>
+              </div>
+            </li>
+          ))
+        )}
       </ul>
     </div>
   );

@@ -450,3 +450,92 @@
     font-weight: bold;
     border: 1px solid #fca5a5;
 }
+
+/* Selector de inventario */
+.selector-inventario {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.inv-btn {
+  padding: 8px 20px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background: #f5f5f5;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.activo-nuevo {
+  border-color: #2196F3;
+  background: #e3f2fd;
+  color: #1565C0;
+}
+
+.activo-usado {
+  border-color: #FF9800;
+  background: #fff3e0;
+  color: #E65100;
+}
+
+/* Selector tipo de pago */
+.selector-tipo-pago {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.pago-btn {
+  padding: 10px 24px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  background: #f5f5f5;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.activo-contado {
+  border-color: #10b981;
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.activo-credito {
+  border-color: #f59e0b;
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.credito-aviso {
+  background: #fff3e0;
+  border: 1px solid #f59e0b;
+  color: #92400e;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.requerido {
+  color: #e65100;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.credito-resumen {
+  background: #fff8e1;
+  border: 1px dashed #f59e0b;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.credito-resumen p {
+  margin: 6px 0;
+  font-size: 15px;
+}

@@ -1,107 +1,125 @@
-/* ===== ESTILOS PARA PANTALLA (Previsualización interna) ===== */
-.factura {
-  width: 210mm;
-  min-height: 297mm;
-  margin: 20px auto;
-  padding: 15mm;
-  background: #fff;
-  color: #000;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  border: 1px solid #eee;
+/* DISEÑO MINIMALISTA PARA TICKET */
+.ticket-minimal {
+    width: 72mm;
+    max-width: 72mm;
+    margin: 0 auto;
+    padding: 0;
+    background: #fff;
+    color: #000 !important;
+    font-family: 'Courier New', Courier, monospace !important;
+    font-size: 12px !important;
+    line-height: 1.2;
 }
 
-.top-section {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
+.tk-center { text-align: center; }
+.tk-bold { font-weight: bold; }
+.tk-xl { font-size: 16px; }
+.tk-lg { font-size: 14px; }
+
+.tk-logo-bn {
+    width: 40mm;
+    height: auto;
+    filter: grayscale(100%) contrast(200%);
+    display: block;
+    margin: 0 auto 5px;
 }
 
-.logo-box img {
-  width: 140px;
-  height: auto;
+.tk-divisor {
+    margin: 5px 0;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
-.factura-info {
-  text-align: right;
+.tk-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 2px;
+    gap: 4px;
 }
 
-.cliente-section {
-  margin-bottom: 20px;
-  border-top: 2px solid #333;
-  border-bottom: 2px solid #333;
-  padding: 10px 0;
+/* Columnas de productos */
+.col-1 {
+    width: 10%;
+    text-align: left;
+    flex-shrink: 0;
+}
+.col-2 {
+    flex: 1;
+    text-align: left;
+    padding-left: 2px;
+    word-break: break-word;
+}
+.col-3 {
+    width: 30%;
+    text-align: right;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
-.tabla {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
+.tk-totales {
+    margin-top: 10px;
 }
 
-.tabla th, .tabla td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
+.tk-footer {
+    margin-top: 15px;
+    font-size: 11px;
 }
 
-.tabla th {
-  background-color: #f8f9fa;
+/* Badge tipo de pago */
+.tk-badge-contado {
+    display: inline-block;
+    margin-top: 4px;
+    font-weight: bold;
+    font-size: 11px;
+    letter-spacing: 0.5px;
 }
 
-.totales {
-  width: 250px;
-  margin-left: auto;
+.tk-badge-credito {
+    display: inline-block;
+    margin-top: 4px;
+    font-weight: bold;
+    font-size: 11px;
+    letter-spacing: 0.5px;
 }
 
-.totales div {
-  display: flex;
-  justify-content: space-between;
-  padding: 5px 0;
+/* Nota de crédito al pie */
+.tk-credito-nota {
+    font-size: 10px;
+    margin-top: 6px;
+    text-align: center;
+    font-style: italic;
+    line-height: 1.4;
 }
 
-.total-final {
-  font-weight: bold;
-  font-size: 1.2rem;
-  border-top: 2px solid #000;
-}
-
-/* ===== CONTROL DE IMPRESIÓN (MÁGICO) ===== */
+/* AJUSTES DE IMPRESIÓN */
 @media print {
-  /* 1. Ocultamos el Layout completo de la App */
-  body * {
-    visibility: hidden;
-  }
+    @page {
+        size: 80mm auto;
+        margin: 0 !important;
+    }
 
-  /* 2. Mostramos SOLO el contenedor de la factura */
-  .print-only-wrapper, 
-  .print-only-wrapper *,
-  .factura, 
-  .factura * {
-    visibility: visible !important;
-  }
+    body * { visibility: hidden !important; }
 
-  /* 3. Posicionamos la factura para que empiece en el origen de la hoja */
-  .factura {
-    display: block !important;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 210mm;
-    margin: 0;
-    padding: 10mm;
-    border: none;
-  }
+    .print-only-wrapper,
+    .print-only-wrapper *,
+    .ticket-minimal,
+    .ticket-minimal * {
+        visibility: visible !important;
+    }
 
-  /* 4. Configuramos la página A4 */
-  @page {
-    size: A4;
-    margin: 0;
-  }
-}
+    .ticket-minimal {
+        position: fixed;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+        width: 72mm !important;
+        padding: 2mm !important;
+    }
 
-/* Evita que se vea en la web normal mientras no se imprime */
-@media screen {
-  .print-only-wrapper {
-    display: none;
-  }
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        text-shadow: none !important;
+    }
 }

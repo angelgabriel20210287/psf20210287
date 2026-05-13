@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 
-// 🔥 AGREGA ESTA RUTA PARA LISTAR TODAS LAS FACTURAS
+// 🔹 LISTAR TODAS LAS FACTURAS
 router.get("/", async (req, res) => {
   try {
     const result = await pool.query(`
@@ -11,6 +11,7 @@ router.get("/", async (req, res) => {
         f.numerofactura,
         f.fecha,
         f.total,
+        f.tipo_pago,
         COALESCE(c.nombre, 'Consumidor Final') AS cliente
       FROM facturas f
       LEFT JOIN cliente c ON f.idcliente = c.idcliente
@@ -22,7 +23,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// 🔹 LISTAR FACTURAS
 // 🔹 FACTURA COMPLETA (PARA REIMPRESIÓN)
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
@@ -30,11 +30,12 @@ router.get("/:id", async (req, res) => {
     const facturaRes = await pool.query(`
       SELECT 
         f.idfactura,
-        f.numerofactura, -- 🔥 Agregado para que no salga S/N
+        f.numerofactura,
         f.fecha,
         f.total,
         f.pago,
         f.cambio,
+        f.tipo_pago,
         COALESCE(c.nombre, 'Consumidor Final') AS nombre,
         c.telefono,
         c.direccion
@@ -53,11 +54,12 @@ router.get("/:id", async (req, res) => {
     const factura = facturaRes.rows[0];
 
     res.json({
-      numerofactura: factura.numerofactura, // 🔥 Ahora se envía al frontend
+      numerofactura: factura.numerofactura,
       fecha: factura.fecha,
       total: factura.total,
       pago: factura.pago,
       cambio: factura.cambio,
+      tipo_pago: factura.tipo_pago || "contado", // ← siempre incluido
       cliente: {
         nombre: factura.nombre,
         telefono: factura.telefono,
@@ -69,6 +71,7 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 // 🔹 ELIMINAR FACTURA
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
@@ -76,22 +79,10 @@ router.delete("/:id", async (req, res) => {
 
   try {
     await client.query("BEGIN");
-
-    // eliminar detalles primero
-    await client.query(
-      "DELETE FROM detalle_facturas WHERE idfactura = $1",
-      [id]
-    );
-
-    // eliminar factura
-    await client.query(
-      "DELETE FROM facturas WHERE idfactura = $1",
-      [id]
-    );
-
+    await client.query("DELETE FROM detalle_facturas WHERE idfactura = $1", [id]);
+    await client.query("DELETE FROM facturas WHERE idfactura = $1", [id]);
     await client.query("COMMIT");
     res.json({ message: "Factura eliminada correctamente" });
-
   } catch (error) {
     await client.query("ROLLBACK");
     res.status(500).json({ error: error.message });
@@ -99,6 +90,5 @@ router.delete("/:id", async (req, res) => {
     client.release();
   }
 });
-
 
 module.exports = router;
